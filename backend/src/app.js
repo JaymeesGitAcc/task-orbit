@@ -1,5 +1,8 @@
 import express from "express"
 import cors from "cors"
+import listRoutes from "./routes/list.routes.js"
+import boardRoutes from "./routes/board.routes.js"
+import cardRoutes from "./routes/card.routes.js"
 
 const app = express()
 
@@ -13,5 +16,9 @@ app.get("/", (_, res) => {
 app.get("/health", (_, res) => {
   res.json({status: "ok", message: "TaskOrbit is running"})
 })
+
+app.use("/api/boards", boardRoutes)
+app.use("/api/lists", listRoutes)
+app.use("/api/cards", cardRoutes)
 
 export default app
