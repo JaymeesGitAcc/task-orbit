@@ -40,42 +40,68 @@ export const moveCard = async (req, res) => {
   try {
     const { cardId } = req.params
     const { targetListId, targetOrder } = req.body
-    
+
     if (!targetListId || targetOrder === undefined) {
       return sendError(res, 400, "targetListId and targetOrder are required")
     }
-    
+
     const card = await Card.findById(cardId)
-    let sourceListId = card.listId
 
     if (!card) {
       return sendError(res, 404, "Card not found")
     }
 
-    // Shift cards in target list
-    await Card.updateMany(
-      {
-        listId: targetListId,
-        order: { $gte: targetOrder },
-      },
-      { $inc: { order: 1 } },
-    )
+    const sourceListId = card.listId
+    const sourceOrder = card.order
 
-    // Update moved card
+    // moving in same list
+    if (String(sourceListId) === String(targetListId)) {
+      if (targetOrder > sourceOrder) {
+        // moving down
+        await Card.updateMany(
+          {
+            listId: sourceListId,
+            order: { $gt: sourceOrder, $lte: targetOrder },
+          },
+          { $inc: { order: -1 } },
+        )
+      } else {
+        // moving up
+        await Card.updateMany(
+          {
+            listId: sourceListId,
+            order: { $gte: targetOrder, $lt: sourceOrder },
+          },
+          { $inc: { order: 1 } },
+        )
+      }
+    } else {
+      // moving in different list
+
+      // fix source list
+      await Card.updateMany(
+        {
+          listId: sourceListId,
+          order: { $gt: sourceOrder },
+        },
+        { $inc: { order: -1 } },
+      )
+
+      // shift target list
+      await Card.updateMany(
+        {
+          listId: targetListId,
+          order: { $gte: targetOrder },
+        },
+        { $inc: { order: 1 } },
+      )
+    }
+
+    // update card
     card.listId = targetListId
     card.order = targetOrder
 
     await card.save()
-
-    // re-order the remaining cards
-    const remainingCards = await Card.find({
-      listId: sourceListId,
-    }).sort({ order: 1 })
-
-    for (let i = 0; i < remainingCards.length; i++) {
-      remainingCards[i].order = i
-      await remainingCards[i].save()
-    }
 
     return sendSuccess(res, 200, "Card moved successfully", card)
   } catch (error) {
