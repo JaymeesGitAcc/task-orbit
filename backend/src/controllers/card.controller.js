@@ -108,3 +108,21 @@ export const moveCard = async (req, res) => {
     return sendError(res, 500, error.message)
   }
 }
+
+export const deleteCard = async (req, res) => {
+  const { cardId } = req.params
+
+  try {
+    const card = await Card.findById(cardId)
+
+    if (!card) {
+      return sendSuccess(res, 400, "Card not found")
+    }
+
+    const deletedCard = await Card.findByIdAndDelete(card._id)
+
+    return sendSuccess(res, 200, "Card Deleted Successfully", deletedCard)
+  } catch (error) {
+    return sendError(res, 500, `deleteCard Error:: `, error.message)
+  }
+}

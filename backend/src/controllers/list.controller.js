@@ -1,3 +1,4 @@
+import Card from "../models/card.model.js"
 import List from "../models/list.model.js"
 import { sendSuccess, sendError } from "../utils/response.js"
 
@@ -37,3 +38,22 @@ export const getListsByBoard = async (req, res) => {
   }
 }
 
+export const deleteList = async (req, res) => {
+  const { listId } = req.params
+  try {
+
+    const list = await List.findById(listId)
+
+    if(!list) {
+      return sendError(res, 400, "List not found")
+    }
+
+    await Card.deleteMany({listId: list._id})
+
+    await List.findByIdAndDelete(list._id)
+
+    return sendSuccess(res, 200, "List deleted Successfully")
+  } catch (error) {
+    return sendError(res, 500, `deleteList Error:: `, error.message)
+  }
+}
