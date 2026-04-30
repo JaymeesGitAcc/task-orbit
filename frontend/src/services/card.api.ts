@@ -14,3 +14,15 @@ export const moveCard = (
     targetOrder,
   })
 }
+
+export const createCard = (
+  title: string,
+  listId: string,
+  description: string = "",
+) => {
+  return API.post("/cards", { title, listId, description })
+}
+
+export const deleteCard = (cardId: string) => {
+  return API.delete(`/cards/${cardId}`)
+}
