@@ -123,6 +123,6 @@ export const deleteCard = async (req, res) => {
 
     return sendSuccess(res, 200, "Card Deleted Successfully", deletedCard)
   } catch (error) {
-    return sendError(res, 500, `deleteCard Error:: `, error.message)
+    return sendError(res, 500, `deleteCard Error:: ${error.message}`)
   }
 }
