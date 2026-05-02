@@ -3,7 +3,7 @@ import BoardPage from "./pages/BoardPage"
 import Login from "./pages/Login"
 import SignUp from "./pages/SignUp"
 import DashBoard from "./pages/DashBoard"
-import ProtectedRoute from "./component/ProtectedRoute"
+import ProtectedRoute from "./components/ProtectedRoute"
 
 const App = () => {
   return (
