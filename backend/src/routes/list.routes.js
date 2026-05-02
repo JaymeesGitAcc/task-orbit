@@ -4,11 +4,12 @@ import {
   deleteList,
   getListsByBoard,
 } from "../controllers/list.controller.js"
+import { protect } from "../middlewares/auth.middleware.js"
 
 const listRoutes = express.Router()
 
-listRoutes.post("/", createList)
-listRoutes.get("/:boardId", getListsByBoard)
-listRoutes.delete("/:listId", deleteList)
+listRoutes.post("/", protect, createList)
+listRoutes.get("/:boardId", protect, getListsByBoard)
+listRoutes.delete("/:listId", protect, deleteList)
 
 export default listRoutes

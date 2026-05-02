@@ -3,13 +3,14 @@ import { sendError, sendSuccess } from "../utils/response.js"
 
 export const createCard = async (req, res) => {
   try {
+    const userId = req.user?.id
     const { title, description, listId } = req.body
 
     if (!title || !listId) {
       return sendError(res, 400, "Title and listId are required")
     }
 
-    const lastCard = await Card.findOne({ listId }).sort({ order: -1 })
+    const lastCard = await Card.findOne({ listId, userId }).sort({ order: -1 })
 
     const newOrder = lastCard ? lastCard.order + 1 : 0
 
@@ -17,6 +18,7 @@ export const createCard = async (req, res) => {
       title,
       description,
       listId,
+      userId,
       order: newOrder,
     })
 
@@ -28,8 +30,9 @@ export const createCard = async (req, res) => {
 
 export const getCardsByList = async (req, res) => {
   try {
+    const userId = req.user?.id
     const { listId } = req.params
-    const cards = await Card.find({ listId }).sort({ order: 1 })
+    const cards = await Card.find({ listId, userId }).sort({ order: 1 })
     return sendSuccess(res, 200, "Cards fetched successfully", cards)
   } catch (error) {
     return sendError(res, 500, error.message)
@@ -38,6 +41,7 @@ export const getCardsByList = async (req, res) => {
 
 export const moveCard = async (req, res) => {
   try {
+    const userId = req.user?.id
     const { cardId } = req.params
     const { targetListId, targetOrder } = req.body
 
@@ -49,6 +53,10 @@ export const moveCard = async (req, res) => {
 
     if (!card) {
       return sendError(res, 404, "Card not found")
+    }
+
+    if(card.userId.toString() !== userId.toString()) {
+      return sendError(res, 400, "Unauthorized")
     }
 
     const sourceListId = card.listId
@@ -111,13 +119,17 @@ export const moveCard = async (req, res) => {
 
 export const deleteCard = async (req, res) => {
   const { cardId } = req.params
-
+  const userId = req.user?.id
   try {
     const card = await Card.findById(cardId)
 
     if (!card) {
       return sendSuccess(res, 400, "Card not found")
     }
+
+    if(card.userId.toString() !== userId.toString()) {
+      return sendError(res, 200, "Forbidden")
+    } 
 
     const deletedCard = await Card.findByIdAndDelete(card._id)
 
