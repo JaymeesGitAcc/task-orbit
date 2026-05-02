@@ -9,31 +9,39 @@ import {
 } from "../services/card.api"
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd"
 import { createList, deleteList } from "../services/list.api"
+import { useNavigate, useParams } from "react-router-dom"
 
 const BoardPage = () => {
   const [lists, setLists] = useState<List[]>([])
   const [cards, setCards] = useState<Record<string, Card[]>>({})
   const [newListTitle, setNewListTitle] = useState("")
   const [newCardTitle, setNewCardTitle] = useState<Record<string, string>>({})
-  const boardId = "69eb92cf7757ed06d8dd82e6"
+  const { id: boardId } = useParams()
+  const navigate = useNavigate()
 
   const fetchLists = async () => {
-    const res = await API.get(`/lists/${boardId}`)
-    const listsData = res.data.data
-    setLists(listsData)
+    try {
+      const res = await API.get(`/lists/${boardId}`)
+      const listsData = res.data.data
+      setLists(listsData)
 
-    // Parallel requests
-    const cardPromises = listsData.map((list: List) => getCardsByList(list._id))
+      const cardPromises = listsData.map((list: List) =>
+        getCardsByList(list._id),
+      )
 
-    const cardResponses = await Promise.all(cardPromises)
+      const cardResponses = await Promise.all(cardPromises)
 
-    const cardsMap: Record<string, Card[]> = {}
+      const cardsMap: Record<string, Card[]> = {}
 
-    listsData.forEach((list: List, index: number) => {
-      cardsMap[list._id] = cardResponses[index].data.data
-    })
+      listsData.forEach((list: List, index: number) => {
+        cardsMap[list._id] = cardResponses[index].data.data
+      })
 
-    setCards(cardsMap)
+      setCards(cardsMap)
+    } catch (error) {
+      console.error(error)
+      navigate("/dashboard")
+    }
   }
 
   const handleDragEnd = async (result: any) => {
