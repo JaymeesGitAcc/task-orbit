@@ -8,7 +8,7 @@ import {
   moveCard,
 } from "../services/card.api"
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd"
-import { createList, deleteList } from "../services/list.api"
+import { createList, deleteList, moveList } from "../services/list.api"
 import { useNavigate, useParams } from "react-router-dom"
 
 const BoardPage = () => {
@@ -49,6 +49,26 @@ const BoardPage = () => {
 
     if (!destination) return
 
+    // Move List
+    if (result.type === "LIST") {
+      const newLists = Array.from(lists)
+      const [moved] = newLists.splice(result.source.index, 1)
+      newLists.splice(result.destination.index, 0, moved)
+
+      // reassign order locally
+      const updated = newLists.map((list, index) => ({
+        ...list,
+        order: index,
+      }))
+
+      setLists(updated)
+
+      moveList(moved._id, result.destination.index)
+
+      return
+    }
+
+    // Move Card
     const sourceListId = source.droppableId
     const targetListId = destination.droppableId
 
@@ -100,7 +120,6 @@ const BoardPage = () => {
       await moveCard(draggableId, targetListId, destination.index)
     } catch (error) {
       console.error(error)
-      // optional: revert UI later
     }
   }
 
@@ -191,77 +210,100 @@ const BoardPage = () => {
   return (
     <div>
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-4 p-4 gap-4">
-          {lists?.map((list) => (
-            <Droppable droppableId={list._id} key={list._id}>
-              {(provided) => (
-                <div
-                  key={list._id}
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className="bg-gray-200 p-4 rounded"
-                >
-                  <div className="flex justify-between">
-                    <h2 className="font-bold">{list.title}</h2>
-                    <button
-                      onClick={() => handleDeleteList(list._id)}
-                      className="text-red-500"
+        <Droppable droppableId="all-lists" direction="horizontal" type="LIST">
+          {(provided) => (
+            <div
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              className="flex gap-4 p-4 overflow-x-auto"
+            >
+              {lists?.map((list, index) => (
+                <Draggable key={list._id} draggableId={list._id} index={index}>
+                  {(provided) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      className="min-w-[250px]"
                     >
-                      ✕
-                    </button>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    {cards[list._id]?.map((card, index) => (
-                      <Draggable
-                        key={card._id}
-                        draggableId={card._id}
-                        index={index}
-                      >
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className="bg-white p-2 rounded shadow flex justify-between items-center"
-                          >
-                            <span>{card.title}</span>
-                            <button
-                              onClick={() =>
-                                handleDeleteCard(card._id, list._id)
-                              }
-                              className="text-red-500"
+                      {/* Drag handle */}
+                      <div {...provided.dragHandleProps}>
+                        <Droppable droppableId={list._id} type="CARD">
+                          {(provided) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.droppableProps}
+                              className="bg-gray-200 p-4 rounded"
                             >
-                              ✕
-                            </button>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                  <input
-                    value={newCardTitle[list._id] || ""}
-                    onChange={(e) =>
-                      setNewCardTitle({
-                        ...newCardTitle,
-                        [list._id]: e.target.value,
-                      })
-                    }
-                    placeholder="Add card"
-                    className="border p-1 w-full rounded"
-                  />
+                              <div className="flex justify-between">
+                                <h2 className="font-bold">{list.title}</h2>
+                                <button
+                                  onClick={() => handleDeleteList(list._id)}
+                                  className="text-red-500"
+                                >
+                                  ✕
+                                </button>
+                              </div>
 
-                  <button
-                    onClick={() => handleAddCard(list._id)}
-                    className="bg-green-500 text-white px-2 py-1 mt-1 rounded"
-                  >
-                    + Add Card
-                  </button>
-                </div>
-              )}
-            </Droppable>
-          ))}
-        </div>
+                              <div className="flex flex-col gap-2">
+                                {cards[list._id]?.map((card, index) => (
+                                  <Draggable
+                                    key={card._id}
+                                    draggableId={card._id}
+                                    index={index}
+                                  >
+                                    {(provided) => (
+                                      <div
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                        className="bg-white p-2 rounded shadow flex justify-between items-center"
+                                      >
+                                        <span>{card.title}</span>
+                                        <button
+                                          onClick={() =>
+                                            handleDeleteCard(card._id, list._id)
+                                          }
+                                          className="text-red-500"
+                                        >
+                                          ✕
+                                        </button>
+                                      </div>
+                                    )}
+                                  </Draggable>
+                                ))}
+                                {provided.placeholder}
+                              </div>
+
+                              <input
+                                value={newCardTitle[list._id] || ""}
+                                onChange={(e) =>
+                                  setNewCardTitle({
+                                    ...newCardTitle,
+                                    [list._id]: e.target.value,
+                                  })
+                                }
+                                placeholder="Add card"
+                                className="border p-1 w-full rounded"
+                              />
+
+                              <button
+                                onClick={() => handleAddCard(list._id)}
+                                className="bg-green-500 text-white px-2 py-1 mt-1 rounded"
+                              >
+                                + Add Card
+                              </button>
+                            </div>
+                          )}
+                        </Droppable>
+                      </div>
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
       </DragDropContext>
       <div className="min-w-[250px]">
         <input
