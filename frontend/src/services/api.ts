@@ -1,3 +1,4 @@
+import { useAuthStore } from "@/store/useAuthStore"
 import axios from "axios"
 
 const API = axios.create({
@@ -5,7 +6,7 @@ const API = axios.create({
 })
 
 API.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token")
+  const token = useAuthStore.getState().token
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
@@ -13,5 +14,15 @@ API.interceptors.request.use((config) => {
 
   return config
 })
+
+API.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    if (err.response?.status === 401) {
+      useAuthStore.getState().logout()
+    }
+    return Promise.reject(err)
+  },
+)
 
 export default API

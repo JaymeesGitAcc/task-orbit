@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react"
 import { getBoards, createBoard } from "../services/board.api"
 import { useNavigate } from "react-router-dom"
+import { useAuthStore } from "@/store/useAuthStore"
 
 const DashBoard = () => {
   const [boards, setBoards] = useState<any[]>([])
   const [title, setTitle] = useState("")
   const navigate = useNavigate()
+  const logout = useAuthStore((s) => s.logout)
 
   useEffect(() => {
     fetchBoards()
@@ -33,7 +35,7 @@ const DashBoard = () => {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem("token")
+    logout()
     navigate("/login")
   }
 
