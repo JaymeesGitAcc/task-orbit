@@ -17,7 +17,7 @@ type AuthState = {
     data: { email: string; password: string },
     cb?: () => void,
   ) => Promise<void>
-  logout: () => void
+  logout: (cd?: () => void) => void
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -50,9 +50,10 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      logout: () => {
+      logout: (cb) => {
         set({ user: null, token: null })
         useAuthStore.persist.clearStorage()
+        cb?.()
       },
     }),
     {

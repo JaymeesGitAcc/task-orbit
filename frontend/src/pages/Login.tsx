@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, Navigate, useNavigate } from "react-router-dom"
 import { Eye, EyeOff, LayoutDashboard } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -39,6 +39,7 @@ const Login = () => {
 
   const login = useAuthStore((s) => s.login)
   const loading = useAuthStore((s) => s.loading)
+  const user = useAuthStore((s) => s.user)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const updated = { ...form, [e.target.name]: e.target.value }
@@ -54,8 +55,10 @@ const Login = () => {
     setErrors(errs)
     if (Object.keys(errs).length > 0) return
 
-    await login(form, () => navigate("/dashboard"))
+    await login(form, () => navigate("/boards"))
   }
+
+  if (user) return <Navigate to="/boards" replace />
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">

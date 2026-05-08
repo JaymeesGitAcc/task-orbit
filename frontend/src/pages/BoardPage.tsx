@@ -40,7 +40,7 @@ const BoardPage = () => {
       setCards(cardsMap)
     } catch (error) {
       console.error(error)
-      navigate("/dashboard")
+      navigate("/boards")
     }
   }
 
@@ -205,7 +205,7 @@ const BoardPage = () => {
 
   useEffect(() => {
     fetchLists()
-  }, [])
+  }, [boardId])
 
   return (
     <div>
