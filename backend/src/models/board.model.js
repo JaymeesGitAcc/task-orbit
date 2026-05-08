@@ -7,6 +7,10 @@ const boardSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    description: {
+      type: String,
+      trim: true
+    },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
