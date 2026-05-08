@@ -3,16 +3,21 @@ import type { Board } from "@/types"
 import { create } from "zustand"
 
 type BoardsState = {
-  boards: Board[] | null
+  boards: Board[]
   loading: boolean
   error: string | null
   fetchBoards: () => Promise<void>
+  addBoard: (board: Board) => void
 }
 
 export const useBoardStore = create<BoardsState>((set) => ({
-  boards: null,
+  boards: [],
   loading: true,
   error: null,
+  addBoard: (board) =>
+    set((state) => ({
+      boards: [...state.boards, board],
+    })),
   fetchBoards: async () => {
     try {
       set({ loading: true })

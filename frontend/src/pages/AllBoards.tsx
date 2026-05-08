@@ -1,21 +1,41 @@
+import CreateBoardModal from "@/components/CreateBoardModal"
 import CustomCard from "@/components/CustomCard"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+import { createBoard } from "@/services/board.api"
 import { useAuthStore } from "@/store/useAuthStore"
 import { useBoardStore } from "@/store/useBoardStore"
 import { Plus } from "lucide-react"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 const AllBoards = () => {
-  const { boards } = useBoardStore()
+  const [openCreateModal, setOpenCreateModal] = useState(false)
+  const [isCreating, setIsCreating] = useState(false)
+  const { boards, addBoard } = useBoardStore()
   const { user } = useAuthStore()
   const navigate = useNavigate()
+
+  const handleCreateBoard = async (data: {
+    title: string
+    description?: string
+  }) => {
+    setIsCreating(true)
+    try {
+      const res = await createBoard(data)
+      console.log(res.data.data)
+      addBoard(res.data.data)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setIsCreating(false)
+    }
+  }
   return (
     <div>
       <div className="flex items-center gap-2 justify-between">
         <h1>Boards</h1>
         <div className="flex items-center gap-2">
-          <Button size="lg">
+          <Button size="lg" onClick={() => setOpenCreateModal(true)}>
             <Plus />
             Create Board
           </Button>
@@ -27,7 +47,7 @@ const AllBoards = () => {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-4">
+      <div className="py-4 space-y-2 sm:grid sm:grid-cols-2 sm:gap-4 sm:space-y-0 md:grid-cols-3 lg:grid-cols-4">
         {boards?.map((board) => (
           <CustomCard
             key={board._id}
@@ -37,12 +57,13 @@ const AllBoards = () => {
             onOpen={() => navigate(`/boards/${board._id}`)}
           />
         ))}
-        <Card className="border w-64 rounded-2xl flex items-center justify-center bg-transparent">
-          <button className="flex items-center gap-1 text-primary">
-            <Plus /> <span>Create</span>
-          </button>
-        </Card>
       </div>
+      <CreateBoardModal
+        open={openCreateModal}
+        onClose={() => setOpenCreateModal(false)}
+        creating={isCreating}
+        onSubmit={handleCreateBoard}
+      />
     </div>
   )
 }

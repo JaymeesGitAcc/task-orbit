@@ -19,6 +19,7 @@ interface TaskCardProps {
   onEdit?: () => void
   onDelete?: () => void
   onOpen?: () => void
+  classnames?: string
 }
 
 const CustomCard = ({
@@ -30,9 +31,10 @@ const CustomCard = ({
   onEdit,
   onDelete,
   onOpen,
+  classnames
 }: TaskCardProps) => {
   return (
-    <Card className="w-64 rounded-2xl shadow-sm border border-gray-200 bg-card">
+    <Card className={`rounded-2xl shadow-sm border border-gray-200 bg-card ${classnames}`}>
       <CardContent className="p-4 flex flex-col gap-3">
         {/* Top Row */}
         <div className="flex items-start justify-between">
