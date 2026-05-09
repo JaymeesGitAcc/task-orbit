@@ -5,49 +5,54 @@ import BoardPage from "@/pages/BoardPage"
 import Login from "@/pages/Login"
 import Settings from "@/pages/Settings"
 import SignUp from "@/pages/SignUp"
-import { BrowserRouter, Route, Routes } from "react-router-dom"
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
+import { Toaster } from "sonner"
 
 const AppRoutes = () => {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <DashBoardLayout />
-            </ProtectedRoute>
-          }
-        >
+    <>
+      <Toaster />
+      <BrowserRouter>
+        <Routes>
           <Route
-            path="boards"
+            path="/"
             element={
               <ProtectedRoute>
-                <AllBoards />
+                <DashBoardLayout />
               </ProtectedRoute>
             }
-          />
-          <Route
-            path="settings"
-            element={
-              <ProtectedRoute>
-                <Settings />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="boards/:id"
-            element={
-              <ProtectedRoute>
-                <BoardPage />
-              </ProtectedRoute>
-            }
-          />
-        </Route>
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<SignUp />} />
-      </Routes>
-    </BrowserRouter>
+          >
+            <Route index element={<Navigate to="boards" replace />} />
+            <Route
+              path="boards"
+              element={
+                <ProtectedRoute>
+                  <AllBoards />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="settings"
+              element={
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="boards/:id"
+              element={
+                <ProtectedRoute>
+                  <BoardPage />
+                </ProtectedRoute>
+              }
+            />
+          </Route>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+        </Routes>
+      </BrowserRouter>
+    </>
   )
 }
 
