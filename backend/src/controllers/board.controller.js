@@ -1,4 +1,6 @@
 import Board from "../models/board.model.js"
+import Card from "../models/card.model.js"
+import List from "../models/list.model.js"
 import User from "../models/user.model.js"
 import { sendError, sendSuccess } from "../utils/response.js"
 
@@ -50,5 +52,29 @@ export const getBoardById = async (req, res) => {
     return sendSuccess(res, 200, "Board fetched", board)
   } catch (error) {
     return sendError(res, 500, error.message)
+  }
+}
+
+export const deleteBoard = async (req, res) => {
+  const userId = req.user.id
+  const { boardId } = req.params
+  try {
+    const board = await Board.findOne({
+      _id: boardId,
+      userId,
+    })
+
+    if (!board) return sendError(res, 404, "Board not found")
+
+    await Card.deleteMany({ boardId })
+    console.log("All Cards deleted")
+    await List.deleteMany({ boardId })
+    console.log("All List deleted")
+    await Board.findByIdAndDelete(boardId)
+    console.log("Board Deleted")
+
+    return sendSuccess(res, 200, "Board deleted Successfully")
+  } catch (error) {
+    return sendError(res, 500, `deleteBoard Error :: ${error.message}`)
   }
 }

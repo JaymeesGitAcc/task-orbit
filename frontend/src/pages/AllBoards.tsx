@@ -1,17 +1,17 @@
 import CreateBoardModal from "@/components/CreateBoardModal"
 import CustomCard from "@/components/CustomCard"
 import { Button } from "@/components/ui/button"
-import { createBoard } from "@/services/board.api"
 import { useAuthStore } from "@/store/useAuthStore"
 import { useBoardStore } from "@/store/useBoardStore"
 import { Plus } from "lucide-react"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { toast } from "sonner"
 
 const AllBoards = () => {
   const [openCreateModal, setOpenCreateModal] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
-  const { boards, addBoard } = useBoardStore()
+  const { boards, addBoard, delBoard } = useBoardStore()
   const { user } = useAuthStore()
   const navigate = useNavigate()
 
@@ -21,13 +21,27 @@ const AllBoards = () => {
   }) => {
     setIsCreating(true)
     try {
-      const res = await createBoard(data)
-      console.log(res.data.data)
-      addBoard(res.data.data)
+      const res = await addBoard(data)
+       if (res) {
+        toast.success("Board Created!")
+      }
     } catch (error) {
       console.log(error)
+      toast.error("Failed to create board")
     } finally {
       setIsCreating(false)
+    }
+  }
+
+  const handleDeleteBoard = async (boardId: string) => {
+    if (!boardId) return
+    try {
+      const res = await delBoard(boardId)
+      if (res) {
+        toast.success("Board deleted!")
+      }
+    } catch (error) {
+      toast.error("Failed to delete board")
     }
   }
   return (
@@ -55,6 +69,7 @@ const AllBoards = () => {
             createdAt={board.createdAt}
             id={board._id}
             onOpen={() => navigate(`/boards/${board._id}`)}
+            onDelete={() => handleDeleteBoard(board._id)}
           />
         ))}
       </div>
