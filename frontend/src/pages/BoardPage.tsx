@@ -145,10 +145,10 @@ const BoardPage = () => {
   const handleAddCard = async (listId: string) => {
     const title = newCardTitle[listId]
     if (!title?.trim()) return
-
+    if (!boardId) return
     try {
-      const res = await createCard(title, listId)
-      const newCard = res.data.data
+      const res = await createCard({ title, listId, boardId })
+      const newCard = res?.data?.data
 
       const updatedListCards = [...(cards[listId] || []), newCard]
 

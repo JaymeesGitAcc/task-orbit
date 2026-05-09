@@ -15,12 +15,13 @@ export const moveCard = (
   })
 }
 
-export const createCard = (
-  title: string,
-  listId: string,
-  description: string = "",
-) => {
-  return API.post("/cards", { title, listId, description })
+export const createCard = (data: {
+  title: string
+  description?: string
+  listId: string
+  boardId: string
+}) => {
+  return API.post("/cards", data)
 }
 
 export const deleteCard = (cardId: string) => {

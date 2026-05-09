@@ -3,6 +3,7 @@ export interface Card {
   title: string
   description?: string
   listId: string
+  boardId: string
   order: number
   createdAt?: string
   updatedAt?: string

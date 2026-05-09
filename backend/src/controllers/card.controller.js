@@ -1,10 +1,11 @@
 import Card from "../models/card.model.js"
+import List from "../models/list.model.js"
 import { sendError, sendSuccess } from "../utils/response.js"
 
 export const createCard = async (req, res) => {
   try {
     const userId = req.user?.id
-    const { title, description, listId } = req.body
+    const { title, description, listId, boardId } = req.body
 
     if (!title || !listId) {
       return sendError(res, 400, "Title and listId are required")
@@ -19,6 +20,7 @@ export const createCard = async (req, res) => {
       description,
       listId,
       userId,
+      boardId,
       order: newOrder,
     })
 
@@ -32,6 +34,10 @@ export const getCardsByList = async (req, res) => {
   try {
     const userId = req.user?.id
     const { listId } = req.params
+
+    const list = await List.findById(listId)
+    if (!list) return sendError(res, 404, "List not found")
+      
     const cards = await Card.find({ listId, userId }).sort({ order: 1 })
     return sendSuccess(res, 200, "Cards fetched successfully", cards)
   } catch (error) {
@@ -55,7 +61,7 @@ export const moveCard = async (req, res) => {
       return sendError(res, 404, "Card not found")
     }
 
-    if(card.userId.toString() !== userId.toString()) {
+    if (card.userId.toString() !== userId.toString()) {
       return sendError(res, 400, "Unauthorized")
     }
 
@@ -127,9 +133,9 @@ export const deleteCard = async (req, res) => {
       return sendSuccess(res, 400, "Card not found")
     }
 
-    if(card.userId.toString() !== userId.toString()) {
+    if (card.userId.toString() !== userId.toString()) {
       return sendError(res, 200, "Forbidden")
-    } 
+    }
 
     const deletedCard = await Card.findByIdAndDelete(card._id)
 
