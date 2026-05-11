@@ -21,6 +21,8 @@ export interface List {
 export interface Board {
   _id: string
   title: string
+  description?: string
+  icon: string
   createdAt?: string
   updatedAt?: string
 }

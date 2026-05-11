@@ -9,12 +9,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { X } from "lucide-react"
+import { ChevronDown, X } from "lucide-react"
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
+import { cn } from "@/lib/utils"
+import { iconOptions, icons } from "@/constants/icons"
 
 interface CreateBoardModalProps {
   open: boolean
   onClose: () => void
-  onSubmit?: (data: { title: string; description: string }) => void
+  onSubmit?: (data?: any) => void
   creating?: boolean
 }
 
@@ -26,19 +29,30 @@ const CreateBoardModal = ({
 }: CreateBoardModalProps) => {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
+  const [openPopover, setOpenPopover] = useState(false)
+  const [icon, setIcon] = useState("folder")
+
+  const SelectedIcon = icons[icon]
 
   const handleSubmit = () => {
     if (!title.trim()) return
     setTitle("")
     setDescription("")
     onClose()
-    onSubmit?.({ title, description })
+    setIcon("folder")
+    onSubmit?.({ title, description, icon })
   }
 
   const handleClose = () => {
     setTitle("")
     setDescription("")
     onClose()
+    setIcon("folder")
+  }
+
+  const handleChangeIcon = (iconName: string) => {
+    setIcon(iconName)
+    setOpenPopover(false)
   }
 
   return (
@@ -57,8 +71,47 @@ const CreateBoardModal = ({
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Board Name */}
           <div className="space-y-1.5">
+            {/* Select Icon option */}
+            <Popover
+              open={openPopover}
+              onOpenChange={(value) => {
+                setOpenPopover(value)
+              }}
+            >
+              <PopoverTrigger asChild>
+                <Button variant="outline">
+                  <SelectedIcon />
+                  Choose Icon{" "}
+                  <ChevronDown
+                    className={cn(
+                      "transition-transform",
+                      openPopover && "rotate-180",
+                    )}
+                  />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="start">
+                <div className="grid grid-cols-8 gap-2">
+                  {iconOptions.map((iconName, index) => {
+                    const Icon = icons[iconName]
+                    return (
+                      <Button
+                        size="icon-sm"
+                        key={index}
+                        variant="outline"
+                        className="hover:text-white hover:bg-primary"
+                        onClick={() => handleChangeIcon(iconName)}
+                      >
+                        <Icon />
+                      </Button>
+                    )
+                  })}
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            {/* Board Name */}
             <Label
               htmlFor="board-name"
               className="text-sm font-medium text-gray-700"
@@ -104,7 +157,7 @@ const CreateBoardModal = ({
             <Button
               onClick={handleSubmit}
               disabled={!title.trim() || creating}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white"
+              className="bg-primary hover:bg-indigo-700 text-white"
             >
               {creating ? "Creating" : "Create Board"}
             </Button>

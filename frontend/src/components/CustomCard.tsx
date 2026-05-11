@@ -1,5 +1,5 @@
-import { MoreHorizontal, LayoutGrid } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
+import { MoreHorizontal } from "lucide-react"
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -9,11 +9,12 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { formatDate } from "@/utils/formatDate"
 import { Link } from "react-router-dom"
+import { icons } from "@/constants/icons"
 
 interface TaskCardProps {
-  icon?: React.ReactNode
   id?: string
   title: string
+  icon?: string
   description?: string
   createdAt?: string
   onEdit?: () => void
@@ -23,7 +24,7 @@ interface TaskCardProps {
 }
 
 const CustomCard = ({
-  icon = <LayoutGrid className="w-5 h-5 text-indigo-500" />,
+  icon = "folder",
   id,
   title,
   description,
@@ -31,14 +32,19 @@ const CustomCard = ({
   onEdit,
   onDelete,
   onOpen,
-  classnames
+  classnames,
 }: TaskCardProps) => {
+  const Icon = icons[icon]
   return (
-    <Card className={`rounded-2xl shadow-sm border border-gray-200 bg-card ${classnames}`}>
-      <CardContent className="p-4 flex flex-col gap-3">
+    <Card
+      className={`rounded-2xl shadow-sm border border-gray-200 bg-card ${classnames}`}
+    >
+      <CardHeader>
         {/* Top Row */}
-        <div className="flex items-start justify-between">
-          <div className="bg-indigo-50 p-2 rounded-lg">{icon}</div>
+        <div className="flex items-center justify-between">
+          <div className="bg-secondary p-2 rounded-lg">
+            {<Icon size={20} />}
+          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -58,30 +64,29 @@ const CustomCard = ({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-
+      </CardHeader>
+      <CardContent className="flex flex-col gap-3">
         {/* Title & Description */}
-        <div>
-          {id ? (
-            <Link
-              to={`/boards/${id}`}
-              className="text-base font-semibold text-gray-900"
-            >
-              {title}
-            </Link>
-          ) : (
-            <h3 className="text-base font-semibold text-gray-900">{title}</h3>
-          )}
-          <p className="text-sm text-gray-500 mt-0.5">{description}</p>
-        </div>
-
-        {/* Footer */}
-
-        {createdAt && (
-          <p className="text-xs text-gray-400 border-t border-gray-100 pt-3">
+        {id ? (
+          <Link
+            to={`/boards/${id}`}
+            className="text-base font-semibold text-gray-900"
+          >
+            {title}
+          </Link>
+        ) : (
+          <h3 className="text-base font-semibold text-gray-900">{title}</h3>
+        )}
+        <p className="text-xs text-gray-400 mt-0.5">{description}</p>
+      </CardContent>
+      {/* Footer */}
+      {createdAt && (
+        <CardFooter className="bg-card">
+          <p className="text-xs text-gray-400 border-gray-100">
             {formatDate(createdAt)}
           </p>
-        )}
-      </CardContent>
+        </CardFooter>
+      )}
     </Card>
   )
 }

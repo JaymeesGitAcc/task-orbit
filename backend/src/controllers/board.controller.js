@@ -7,7 +7,7 @@ import { sendError, sendSuccess } from "../utils/response.js"
 export const createBoard = async (req, res) => {
   try {
     const userId = req.user?.id
-    const { title, description } = req.body
+    const { title, description, icon } = req.body
 
     if (!title || !title.trim()) {
       return sendError(res, 400, "Title is required")
@@ -16,6 +16,7 @@ export const createBoard = async (req, res) => {
     const board = await Board.create({
       title: title.trim(),
       description: description?.trim() || "",
+      icon,
       userId,
     })
 

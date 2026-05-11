@@ -1,8 +1,9 @@
 import Logo from "@/components/Logo"
 import { Button } from "@/components/ui/button"
+import { icons } from "@/constants/icons"
 import { useAuthStore } from "@/store/useAuthStore"
 import { useBoardStore } from "@/store/useBoardStore"
-import { ArrowRight, Grid, LogOut } from "lucide-react"
+import { ArrowRight, KanbanSquare, LogOut, Settings } from "lucide-react"
 import { useEffect } from "react"
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom"
 
@@ -42,7 +43,7 @@ const DashBoardLayout = () => {
                 path === "/boards" ? "text-primary bg-primary/10" : ""
               }`}
             >
-              <Grid size={18} />
+              <KanbanSquare size={18} />
               <span>Boards</span>
             </Link>
             <Link
@@ -51,7 +52,7 @@ const DashBoardLayout = () => {
                 path === "/settings" ? "text-primary bg-primary/10" : ""
               }`}
             >
-              <Grid size={18} />
+              <Settings size={18} />
               <span>Settings</span>
             </Link>
           </div>
@@ -71,20 +72,24 @@ const DashBoardLayout = () => {
               </div>
             )}
             <div className="p-4 space-y-1">
-              {boardList?.map((board) => (
-                <Link
-                  to={`/boards/${board._id}`}
-                  key={board._id}
-                  className={`flex w-full items-center duration-150 text-semibold gap-2 px-2 py-3 rounded-md hover:bg-primary/5 ${
-                    path === `/boards/${board._id}`
-                      ? "text-primary bg-primary/10"
-                      : ""
-                  }`}
-                >
-                  <Grid size={18} />
-                  <span>{formatBoardTitle(board.title)}</span>
-                </Link>
-              ))}
+              {boardList?.map((board) => {
+                const Icon = icons[board.icon]
+
+                return (
+                  <Link
+                    to={`/boards/${board._id}`}
+                    key={board._id}
+                    className={`flex w-full items-center duration-150 text-semibold gap-2 px-2 py-3 rounded-md hover:bg-primary/5 ${
+                      path === `/boards/${board._id}`
+                        ? "text-primary bg-primary/10"
+                        : ""
+                    }`}
+                  >
+                    <Icon size={18} />
+                    <span>{formatBoardTitle(board.title)}</span>
+                  </Link>
+                )
+              })}
               {hasMore ? (
                 <Link
                   to="/boards"

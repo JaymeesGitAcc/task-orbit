@@ -10,6 +10,9 @@ import {
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd"
 import { createList, deleteList, moveList } from "../services/list.api"
 import { useNavigate, useParams } from "react-router-dom"
+import TaskCard from "@/components/TaskCard"
+import TasksContainer from "@/components/TasksContainer"
+import { useBoardStore } from "@/store/useBoardStore"
 
 const BoardPage = () => {
   const [lists, setLists] = useState<List[]>([])
@@ -18,6 +21,9 @@ const BoardPage = () => {
   const [newCardTitle, setNewCardTitle] = useState<Record<string, string>>({})
   const { id: boardId } = useParams()
   const navigate = useNavigate()
+  const { boards } = useBoardStore()
+
+  const board = boards?.find((board) => board._id === boardId)
 
   const fetchLists = async () => {
     try {
@@ -209,13 +215,17 @@ const BoardPage = () => {
 
   return (
     <div>
+      <div className="py-4">
+        <h1 className="text-2xl font-semibold ">{board?.title}</h1>
+        <p className="text-sm text-muted-foreground mt-1">{board?.description}</p>
+      </div>
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="all-lists" direction="horizontal" type="LIST">
           {(provided) => (
             <div
               ref={provided.innerRef}
               {...provided.droppableProps}
-              className="flex gap-4 p-4 overflow-x-auto"
+              className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4"
             >
               {lists?.map((list, index) => (
                 <Draggable key={list._id} draggableId={list._id} index={index}>
@@ -223,7 +233,6 @@ const BoardPage = () => {
                     <div
                       ref={provided.innerRef}
                       {...provided.draggableProps}
-                      className="min-w-[250px]"
                     >
                       {/* Drag handle */}
                       <div {...provided.dragHandleProps}>
@@ -232,19 +241,14 @@ const BoardPage = () => {
                             <div
                               ref={provided.innerRef}
                               {...provided.droppableProps}
-                              className="bg-gray-200 p-4 rounded"
                             >
-                              <div className="flex justify-between">
-                                <h2 className="font-bold">{list.title}</h2>
-                                <button
-                                  onClick={() => handleDeleteList(list._id)}
-                                  className="text-red-500"
-                                >
-                                  ✕
-                                </button>
-                              </div>
-
-                              <div className="flex flex-col gap-2">
+                            <TasksContainer
+                              title={list.title}
+                              onDelete={() => handleDeleteList(list._id)}
+                              classNames="rounded-lg p-4"
+                             
+                            >
+                              <div className="space-y-3">
                                 {cards[list._id]?.map((card, index) => (
                                   <Draggable
                                     key={card._id}
@@ -256,24 +260,20 @@ const BoardPage = () => {
                                         ref={provided.innerRef}
                                         {...provided.draggableProps}
                                         {...provided.dragHandleProps}
-                                        className="bg-white p-2 rounded shadow flex justify-between items-center"
                                       >
-                                        <span>{card.title}</span>
-                                        <button
-                                          onClick={() =>
+                                        <TaskCard
+                                          title={card.title}
+                                          createdAt={card.createdAt}
+                                          onDelete={() =>
                                             handleDeleteCard(card._id, list._id)
                                           }
-                                          className="text-red-500"
-                                        >
-                                          ✕
-                                        </button>
+                                        />
                                       </div>
                                     )}
                                   </Draggable>
                                 ))}
                                 {provided.placeholder}
                               </div>
-
                               <input
                                 value={newCardTitle[list._id] || ""}
                                 onChange={(e) =>
@@ -292,6 +292,8 @@ const BoardPage = () => {
                               >
                                 + Add Card
                               </button>
+                            </TasksContainer>
+
                             </div>
                           )}
                         </Droppable>

@@ -3,6 +3,7 @@ import CustomCard from "@/components/CustomCard"
 import { Button } from "@/components/ui/button"
 import { useAuthStore } from "@/store/useAuthStore"
 import { useBoardStore } from "@/store/useBoardStore"
+import { limitText } from "@/utils/limtText"
 import { Plus } from "lucide-react"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
@@ -17,6 +18,7 @@ const AllBoards = () => {
 
   const handleCreateBoard = async (data: {
     title: string
+    icon: string
     description?: string
   }) => {
     setIsCreating(true)
@@ -66,6 +68,8 @@ const AllBoards = () => {
           <CustomCard
             key={board._id}
             title={board.title}
+            description={limitText(board.description)}
+            icon={board.icon}
             createdAt={board.createdAt}
             id={board._id}
             onOpen={() => navigate(`/boards/${board._id}`)}

@@ -11,6 +11,10 @@ const boardSchema = new mongoose.Schema(
       type: String,
       trim: true
     },
+    icon: {
+      type: String,
+      default: "folder"
+    },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
