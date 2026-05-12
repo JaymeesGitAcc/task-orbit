@@ -79,3 +79,27 @@ export const deleteBoard = async (req, res) => {
     return sendError(res, 500, `deleteBoard Error :: ${error.message}`)
   }
 }
+
+export const updateBoard = async (req, res) => {
+  const userId = req.user.id
+  const { boardId } = req.params
+  try {
+    const updatedBoard = await Board.findOneAndUpdate(
+      {
+        userId,
+        _id: boardId,
+      },
+      req.body,
+      { returnDocument: "after", runValidators: true },
+    )
+    if (!updatedBoard) {
+      return sendError(res, 404, "Board not found", {
+        message: "Board not found",
+        success: false,
+      })
+    }
+    return sendSuccess(res, 200, "Board Updated Successfully", updatedBoard)
+  } catch (error) {
+    return sendError(res, 500, `Internal Server Error:: ${error.message}`)
+  }
+}

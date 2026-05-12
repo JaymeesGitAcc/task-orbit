@@ -4,6 +4,7 @@ import {
   deleteBoard,
   getBoardById,
   getBoards,
+  updateBoard,
 } from "../controllers/board.controller.js"
 import { protect } from "../middlewares/auth.middleware.js"
 
@@ -13,5 +14,6 @@ boardRoutes.post("/", protect, createBoard)
 boardRoutes.get("/", protect, getBoards)
 boardRoutes.get("/:boardId", protect, getBoardById)
 boardRoutes.delete("/:boardId", protect, deleteBoard)
+boardRoutes.patch("/:boardId", protect, updateBoard)
 
 export default boardRoutes

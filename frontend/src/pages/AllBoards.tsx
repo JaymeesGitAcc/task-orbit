@@ -1,8 +1,9 @@
-import CreateBoardModal from "@/components/CreateBoardModal"
+import BoardModal from "@/components/BoardModal"
 import CustomCard from "@/components/CustomCard"
 import { Button } from "@/components/ui/button"
 import { useAuthStore } from "@/store/useAuthStore"
 import { useBoardStore } from "@/store/useBoardStore"
+import type { Board } from "@/types"
 import { limitText } from "@/utils/limtText"
 import { Plus } from "lucide-react"
 import { useState } from "react"
@@ -11,8 +12,11 @@ import { toast } from "sonner"
 
 const AllBoards = () => {
   const [openCreateModal, setOpenCreateModal] = useState(false)
+  const [openEditModal, setOpenEditModal] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
-  const { boards, addBoard, delBoard } = useBoardStore()
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [boardToUpdate, setBoardToUpdate] = useState<Board | null>(null)
+  const { boards, addBoard, delBoard, editBoard } = useBoardStore()
   const { user } = useAuthStore()
   const navigate = useNavigate()
 
@@ -24,7 +28,7 @@ const AllBoards = () => {
     setIsCreating(true)
     try {
       const res = await addBoard(data)
-       if (res) {
+      if (res) {
         toast.success("Board Created!")
       }
     } catch (error) {
@@ -46,6 +50,29 @@ const AllBoards = () => {
       toast.error("Failed to delete board")
     }
   }
+
+  const handleUpdateBoard = async (
+    boardId: string,
+    data: {
+      title?: string
+      description?: string
+      icon?: string
+    },
+  ) => {
+    setIsUpdating(true)
+    try {
+      const res = await editBoard(boardId, data)
+      if (res.data.data.success) {
+        toast.success("Board Updated!")
+      }
+    } catch (error) {
+      console.log(error)
+      toast.error("Failed to Update board")
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
   return (
     <div>
       <div className="flex items-center gap-2 justify-between">
@@ -74,14 +101,25 @@ const AllBoards = () => {
             id={board._id}
             onOpen={() => navigate(`/boards/${board._id}`)}
             onDelete={() => handleDeleteBoard(board._id)}
+            onEdit={() => {
+              setOpenEditModal(true)
+              setBoardToUpdate(board)
+            }}
           />
         ))}
       </div>
-      <CreateBoardModal
+      <BoardModal
         open={openCreateModal}
         onClose={() => setOpenCreateModal(false)}
         creating={isCreating}
         onSubmit={handleCreateBoard}
+      />
+      <BoardModal
+        open={openEditModal}
+        onClose={() => setOpenEditModal(false)}
+        creating={isUpdating}
+        board={boardToUpdate}
+        editFn={handleUpdateBoard}
       />
     </div>
   )

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   Dialog,
   DialogContent,
@@ -9,22 +9,30 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { ChevronDown, X } from "lucide-react"
+import { ChevronDown, LoaderCircle, X } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
 import { cn } from "@/lib/utils"
 import { iconOptions, icons } from "@/constants/icons"
+import type { Board } from "@/types"
 
 interface CreateBoardModalProps {
+  board?: Board | null
   open: boolean
   onClose: () => void
   onSubmit?: (data?: any) => void
+  editFn?: (
+    id: string,
+    data: { title?: string; description?: string; icon?: string },
+  ) => Promise<void>
   creating?: boolean
 }
 
-const CreateBoardModal = ({
+const BoardModal = ({
+  board = null,
   open,
   onClose,
   onSubmit,
+  editFn,
   creating,
 }: CreateBoardModalProps) => {
   const [title, setTitle] = useState("")
@@ -34,20 +42,23 @@ const CreateBoardModal = ({
 
   const SelectedIcon = icons[icon]
 
-  const handleSubmit = () => {
-    if (!title.trim()) return
+  const reset = () => {
     setTitle("")
     setDescription("")
-    onClose()
     setIcon("folder")
-    onSubmit?.({ title, description, icon })
+    onClose()
+  }
+
+  const handleSubmit = () => {
+    if (!title.trim()) return
+    if (board) {
+      editFn?.(board._id, { title, description, icon })
+    } else onSubmit?.({ title, description, icon })
+    reset()
   }
 
   const handleClose = () => {
-    setTitle("")
-    setDescription("")
-    onClose()
-    setIcon("folder")
+    reset()
   }
 
   const handleChangeIcon = (iconName: string) => {
@@ -55,12 +66,20 @@ const CreateBoardModal = ({
     setOpenPopover(false)
   }
 
+  useEffect(() => {
+    if (board) {
+      setTitle(board.title)
+      if (board.description) setDescription(board.description)
+      if (board.icon) setIcon(board.icon)
+    }
+  }, [board])
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md rounded-2xl p-6 gap-0 [&>button]:hidden">
         <DialogHeader className="flex flex-row items-center justify-between mb-4">
           <DialogTitle className="text-lg font-semibold text-gray-900">
-            Create New Board
+            {!board ? "Create New Board" : "Update Board"}
           </DialogTitle>
           <button
             onClick={handleClose}
@@ -82,7 +101,7 @@ const CreateBoardModal = ({
               <PopoverTrigger asChild>
                 <Button variant="outline">
                   <SelectedIcon />
-                  Choose Icon{" "}
+                  {!board ? "Choose" : "Update"} Icon{" "}
                   <ChevronDown
                     className={cn(
                       "transition-transform",
@@ -159,7 +178,8 @@ const CreateBoardModal = ({
               disabled={!title.trim() || creating}
               className="bg-primary hover:bg-indigo-700 text-white"
             >
-              {creating ? "Creating" : "Create Board"}
+              {creating ? <LoaderCircle className="animate-spin" /> : null}
+              {!board ? "Create" : "Update"}
             </Button>
           </div>
         </div>
@@ -168,4 +188,4 @@ const CreateBoardModal = ({
   )
 }
 
-export default CreateBoardModal
+export default BoardModal
