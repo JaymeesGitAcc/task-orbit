@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react"
 import API from "../services/api"
-import type { Card, List } from "../types"
+import type { Card, List, UpdateCardPayload } from "../types"
 import {
   createCard,
   deleteCard,
   getCardsByList,
   moveCard,
+  updateCard,
 } from "../services/card.api"
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd"
 import { createList, deleteList, moveList } from "../services/list.api"
@@ -13,17 +14,26 @@ import { useNavigate, useParams } from "react-router-dom"
 import TaskCard from "@/components/TaskCard"
 import TasksContainer from "@/components/TasksContainer"
 import { useBoardStore } from "@/store/useBoardStore"
+import { Button } from "@/components/ui/button"
+import { Plus } from "lucide-react"
+import TaskModal from "@/components/TaskModal"
 
 const BoardPage = () => {
   const [lists, setLists] = useState<List[]>([])
   const [cards, setCards] = useState<Record<string, Card[]>>({})
   const [newListTitle, setNewListTitle] = useState("")
-  const [newCardTitle, setNewCardTitle] = useState<Record<string, string>>({})
+  const [openCreateCard, setOpenCreateCard] = useState(false)
+  const [openUpdateCard, setOpenUpdateCard] = useState(false)
+  const [selectedListId, setSelectedListId] = useState<string>("")
+  const [selectedCardId, setSelectedCardId] = useState<string>("")
   const { id: boardId } = useParams()
   const navigate = useNavigate()
   const { boards } = useBoardStore()
 
   const board = boards?.find((board) => board._id === boardId)
+  const cardToUpdate = selectedListId.trim()
+    ? cards[`${selectedListId}`].find((card) => card._id === selectedCardId)
+    : null
 
   const fetchLists = async () => {
     try {
@@ -148,25 +158,33 @@ const BoardPage = () => {
     }
   }
 
-  const handleAddCard = async (listId: string) => {
-    const title = newCardTitle[listId]
-    if (!title?.trim()) return
+  const handleAddCard = async ({
+    title,
+    description,
+    listId,
+  }: {
+    title: string
+    description?: string
+    listId: string
+  }) => {
+    if (!title.trim()) return
+    if (!listId) return
     if (!boardId) return
+
     try {
-      const res = await createCard({ title, listId, boardId })
-      const newCard = res?.data?.data
-
-      const updatedListCards = [...(cards[listId] || []), newCard]
-
-      setCards({
-        ...cards,
-        [listId]: updatedListCards,
+      const res = await createCard({
+        title,
+        description,
+        listId,
+        boardId,
       })
 
-      setNewCardTitle({
-        ...newCardTitle,
-        [listId]: "",
-      })
+      const newCard = res.data.data
+
+      setCards((prev) => ({
+        ...prev,
+        [listId]: [...(prev[listId] || []), newCard],
+      }))
     } catch (err) {
       console.error(err)
     }
@@ -209,6 +227,29 @@ const BoardPage = () => {
     }
   }
 
+  const handleUpdateCard = async (cardId: string, data: UpdateCardPayload) => {
+    if (!cardId?.trim()) return
+
+    try {
+      const res = await updateCard(cardId, data)
+      const updatedCard = res.data.data
+
+      setCards((prev) => ({
+        ...prev,
+        [selectedListId]: prev[selectedListId].map((card) =>
+          card._id === cardId
+            ? {
+                ...card,
+                ...updatedCard,
+              }
+            : card,
+        ),
+      }))
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   useEffect(() => {
     fetchLists()
   }, [boardId])
@@ -217,7 +258,9 @@ const BoardPage = () => {
     <div>
       <div className="py-4">
         <h1 className="text-2xl font-semibold ">{board?.title}</h1>
-        <p className="text-sm text-muted-foreground mt-1">{board?.description}</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          {board?.description}
+        </p>
       </div>
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="all-lists" direction="horizontal" type="LIST">
@@ -225,15 +268,12 @@ const BoardPage = () => {
             <div
               ref={provided.innerRef}
               {...provided.droppableProps}
-              className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4"
+              className="grid grid-cols-2 gap-4 md:grid-cols-4"
             >
               {lists?.map((list, index) => (
                 <Draggable key={list._id} draggableId={list._id} index={index}>
                   {(provided) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                    >
+                    <div ref={provided.innerRef} {...provided.draggableProps}>
                       {/* Drag handle */}
                       <div {...provided.dragHandleProps}>
                         <Droppable droppableId={list._id} type="CARD">
@@ -242,58 +282,56 @@ const BoardPage = () => {
                               ref={provided.innerRef}
                               {...provided.droppableProps}
                             >
-                            <TasksContainer
-                              title={list.title}
-                              onDelete={() => handleDeleteList(list._id)}
-                              classNames="rounded-lg p-4"
-                             
-                            >
-                              <div className="space-y-3">
-                                {cards[list._id]?.map((card, index) => (
-                                  <Draggable
-                                    key={card._id}
-                                    draggableId={card._id}
-                                    index={index}
-                                  >
-                                    {(provided) => (
-                                      <div
-                                        ref={provided.innerRef}
-                                        {...provided.draggableProps}
-                                        {...provided.dragHandleProps}
-                                      >
-                                        <TaskCard
-                                          title={card.title}
-                                          createdAt={card.createdAt}
-                                          onDelete={() =>
-                                            handleDeleteCard(card._id, list._id)
-                                          }
-                                        />
-                                      </div>
-                                    )}
-                                  </Draggable>
-                                ))}
-                                {provided.placeholder}
-                              </div>
-                              <input
-                                value={newCardTitle[list._id] || ""}
-                                onChange={(e) =>
-                                  setNewCardTitle({
-                                    ...newCardTitle,
-                                    [list._id]: e.target.value,
-                                  })
-                                }
-                                placeholder="Add card"
-                                className="border p-1 w-full rounded"
-                              />
-
-                              <button
-                                onClick={() => handleAddCard(list._id)}
-                                className="bg-green-500 text-white px-2 py-1 mt-1 rounded"
+                              <TasksContainer
+                                title={list.title}
+                                onDelete={() => handleDeleteList(list._id)}
+                                classNames="rounded-lg p-4"
                               >
-                                + Add Card
-                              </button>
-                            </TasksContainer>
-
+                                <div className="space-y-3">
+                                  {cards[list._id]?.map((card, index) => (
+                                    <Draggable
+                                      key={card._id}
+                                      draggableId={card._id}
+                                      index={index}
+                                    >
+                                      {(provided) => (
+                                        <div
+                                          ref={provided.innerRef}
+                                          {...provided.draggableProps}
+                                          {...provided.dragHandleProps}
+                                        >
+                                          <TaskCard
+                                            title={card.title}
+                                            createdAt={card.createdAt}
+                                            onDelete={() =>
+                                              handleDeleteCard(
+                                                card._id,
+                                                list._id,
+                                              )
+                                            }
+                                            onEdit={() => {
+                                              setOpenUpdateCard(true)
+                                              setSelectedListId(list._id)
+                                              setSelectedCardId(card._id)
+                                            }}
+                                          />
+                                        </div>
+                                      )}
+                                    </Draggable>
+                                  ))}
+                                  {provided.placeholder}
+                                </div>
+                                <Button
+                                  className="w-full bg-card text-gray-600 py-5 my-2"
+                                  onClick={() => {
+                                    setOpenCreateCard(true)
+                                    setSelectedListId(list._id)
+                                  }}
+                                >
+                                  <Plus className="text-gray-600" />
+                                  Add Task
+                                </Button>
+                              </TasksContainer>
                             </div>
                           )}
                         </Droppable>
@@ -322,6 +360,27 @@ const BoardPage = () => {
           + Add List
         </button>
       </div>
+      <TaskModal
+        open={openCreateCard}
+        onClose={() => setOpenCreateCard(false)}
+        onSubmit={(data) =>
+          handleAddCard({
+            ...data,
+            listId: selectedListId,
+          })
+        }
+      />
+      {cardToUpdate ? (
+        <TaskModal
+          open={openUpdateCard}
+          onClose={() => setOpenUpdateCard(false)}
+          initialData={{
+            title: cardToUpdate.title,
+            description: cardToUpdate.description || "",
+          }}
+          onSubmit={(data) => handleUpdateCard(selectedCardId, data)}
+        />
+      ) : null}
     </div>
   )
 }

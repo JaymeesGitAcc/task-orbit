@@ -26,3 +26,15 @@ export interface Board {
   createdAt?: string
   updatedAt?: string
 }
+
+export interface CreateCardPayload {
+  title: string,
+  listId: string,
+  boardId: string
+  description?: string
+}
+
+export interface UpdateCardPayload {
+  title: string,
+  description?: string
+}

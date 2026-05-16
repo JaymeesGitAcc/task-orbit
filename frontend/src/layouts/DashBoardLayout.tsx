@@ -29,7 +29,7 @@ const DashBoardLayout = () => {
   }, [])
 
   return (
-    <div className="h-screen">
+    <div className="h-screen max-w-[1440px] mx-auto">
       <div className="h-full border flex">
         <aside className="bg-sidebar w-[20%]">
           <div className="px-4 py-6">
@@ -73,7 +73,7 @@ const DashBoardLayout = () => {
             )}
             <div className="p-4 space-y-1">
               {boardList?.map((board) => {
-                const Icon = icons[board.icon]
+                const Icon = icons[`${board.icon}`]
 
                 return (
                   <Link

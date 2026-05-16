@@ -37,7 +37,7 @@ export const getCardsByList = async (req, res) => {
 
     const list = await List.findById(listId)
     if (!list) return sendError(res, 404, "List not found")
-      
+
     const cards = await Card.find({ listId, userId }).sort({ order: 1 })
     return sendSuccess(res, 200, "Cards fetched successfully", cards)
   } catch (error) {
@@ -142,5 +142,35 @@ export const deleteCard = async (req, res) => {
     return sendSuccess(res, 200, "Card Deleted Successfully", deletedCard)
   } catch (error) {
     return sendError(res, 500, `deleteCard Error:: ${error.message}`)
+  }
+}
+
+export const udpateCard = async (req, res) => {
+  const { cardId } = req.params
+  const userId = req.user.id
+
+  try {
+    if(!req.body?.title.trim()) {
+      return sendError(res, 401, "Title is required")
+    }
+
+    const updatedCard = await Card.findByIdAndUpdate(
+      {
+        _id: cardId,
+        userId,
+      },
+      req.body,
+      { returnDocument: "after", runValidators: true },
+    )
+
+    if (!updatedCard) {
+      return sendError(res, 404, "Card not found", {
+        message: "Card not found",
+        success: false,
+      })
+    }
+    return sendSuccess(res, 200, "Card Updated Successfully", updatedCard)
+  } catch (error) {
+    return sendError(res, 500, `Internal Server Error:: ${error}`)
   }
 }

@@ -4,6 +4,7 @@ import {
   deleteCard,
   getCardsByList,
   moveCard,
+  udpateCard,
 } from "../controllers/card.controller.js"
 import { protect } from "../middlewares/auth.middleware.js"
 
@@ -13,5 +14,6 @@ cardRoutes.post("/", protect, createCard)
 cardRoutes.get("/:listId", protect, getCardsByList)
 cardRoutes.put("/:cardId/move", protect, moveCard)
 cardRoutes.delete("/:cardId", protect, deleteCard)
+cardRoutes.patch("/:cardId", protect, udpateCard)
 
 export default cardRoutes
