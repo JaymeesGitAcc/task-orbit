@@ -19,7 +19,7 @@ const cardSchema = new mongoose.Schema(
     boardId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Board",
-      required: true
+      required: true,
     },
     order: {
       type: Number,
@@ -29,6 +29,20 @@ const cardSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    labels: [
+      {
+        text: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+
+        color: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
   },
   { timestamps: true },
 )

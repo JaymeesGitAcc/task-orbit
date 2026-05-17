@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import API from "../services/api"
-import type { Card, List, UpdateCardPayload } from "../types"
+import type { Card, CreateCardPayload, List, UpdateCardPayload } from "../types"
 import {
   createCard,
   deleteCard,
@@ -26,14 +26,16 @@ const BoardPage = () => {
   const [openUpdateCard, setOpenUpdateCard] = useState(false)
   const [selectedListId, setSelectedListId] = useState<string>("")
   const [selectedCardId, setSelectedCardId] = useState<string>("")
+  const [readOnly, setReadOnly] = useState(false)
   const { id: boardId } = useParams()
   const navigate = useNavigate()
   const { boards } = useBoardStore()
 
   const board = boards?.find((board) => board._id === boardId)
-  const cardToUpdate = selectedListId.trim()
-    ? cards[`${selectedListId}`].find((card) => card._id === selectedCardId)
-    : null
+
+  const selectedCard =
+    selectedListId.trim() &&
+    cards[`${selectedListId}`].find((card) => card._id === selectedCardId)
 
   const fetchLists = async () => {
     try {
@@ -162,11 +164,9 @@ const BoardPage = () => {
     title,
     description,
     listId,
-  }: {
-    title: string
-    description?: string
-    listId: string
-  }) => {
+    boardId,
+    labels,
+  }: CreateCardPayload) => {
     if (!title.trim()) return
     if (!listId) return
     if (!boardId) return
@@ -177,6 +177,7 @@ const BoardPage = () => {
         description,
         listId,
         boardId,
+        labels,
       })
 
       const newCard = res.data.data
@@ -314,6 +315,12 @@ const BoardPage = () => {
                                               setSelectedListId(list._id)
                                               setSelectedCardId(card._id)
                                             }}
+                                            onOpen={() => {
+                                              setSelectedCardId(card._id)
+                                              setSelectedListId(list._id)
+                                              setOpenUpdateCard(true)
+                                              setReadOnly(true)
+                                            }}
                                           />
                                         </div>
                                       )}
@@ -367,20 +374,20 @@ const BoardPage = () => {
           handleAddCard({
             ...data,
             listId: selectedListId,
+            boardId,
           })
         }
       />
-      {cardToUpdate ? (
-        <TaskModal
-          open={openUpdateCard}
-          onClose={() => setOpenUpdateCard(false)}
-          initialData={{
-            title: cardToUpdate.title,
-            description: cardToUpdate.description || "",
-          }}
-          onSubmit={(data) => handleUpdateCard(selectedCardId, data)}
-        />
-      ) : null}
+      <TaskModal
+        open={openUpdateCard}
+        onClose={() => {
+          setOpenUpdateCard(false)
+          setReadOnly(false)
+        }}
+        cardData={selectedCard || undefined}
+        onSubmit={(data) => handleUpdateCard(selectedCardId, data)}
+        readOnly={readOnly}
+      />
     </div>
   )
 }

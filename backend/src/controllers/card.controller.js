@@ -5,7 +5,7 @@ import { sendError, sendSuccess } from "../utils/response.js"
 export const createCard = async (req, res) => {
   try {
     const userId = req.user?.id
-    const { title, description, listId, boardId } = req.body
+    const { title, description, listId, boardId, labels } = req.body
 
     if (!title || !listId) {
       return sendError(res, 400, "Title and listId are required")
@@ -21,6 +21,7 @@ export const createCard = async (req, res) => {
       listId,
       userId,
       boardId,
+      labels,
       order: newOrder,
     })
 

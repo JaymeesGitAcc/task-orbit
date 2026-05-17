@@ -2,6 +2,7 @@ export interface Card {
   _id: string
   title: string
   description?: string
+  labels?: LabelData[]
   listId: string
   boardId: string
   order: number
@@ -27,14 +28,22 @@ export interface Board {
   updatedAt?: string
 }
 
+export interface LabelData {
+  _id?: string
+  text: string
+  color: string
+}
+
 export interface CreateCardPayload {
-  title: string,
-  listId: string,
-  boardId: string
+  title: string
+  listId: string | undefined
+  boardId: string | undefined
   description?: string
+  labels?: LabelData[]
 }
 
 export interface UpdateCardPayload {
-  title: string,
+  title: string
   description?: string
+  labels?: LabelData[]
 }
