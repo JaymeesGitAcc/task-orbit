@@ -1,5 +1,6 @@
 import BoardModal from "@/components/BoardModal"
 import CustomCard from "@/components/CustomCard"
+import DeleteDialog from "@/components/DeleteDialog"
 import { Button } from "@/components/ui/button"
 import { useAuthStore } from "@/store/useAuthStore"
 import { useBoardStore } from "@/store/useBoardStore"
@@ -16,6 +17,9 @@ const AllBoards = () => {
   const [isCreating, setIsCreating] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
   const [boardToUpdate, setBoardToUpdate] = useState<Board | null>(null)
+  const [openDelete, setOpenDelete] = useState(false)
+  const [boardId, setBoardId] = useState<string | number>("")
+  const [isDeleting, setIsDeleting] = useState(false)
   const { boards, addBoard, delBoard, editBoard } = useBoardStore()
   const { user } = useAuthStore()
   const navigate = useNavigate()
@@ -39,15 +43,18 @@ const AllBoards = () => {
     }
   }
 
-  const handleDeleteBoard = async (boardId: string) => {
+  const handleDeleteBoard = async (boardId: string | number) => {
+    setIsDeleting(true)
     if (!boardId) return
     try {
-      const res = await delBoard(boardId)
+      const res = await delBoard(String(boardId))
       if (res) {
         toast.success("Board deleted!")
       }
     } catch (error) {
       toast.error("Failed to delete board")
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -100,7 +107,10 @@ const AllBoards = () => {
             createdAt={board.createdAt}
             id={board._id}
             onOpen={() => navigate(`/boards/${board._id}`)}
-            onDelete={() => handleDeleteBoard(board._id)}
+            onDelete={() => {
+              setBoardId(board._id)
+              setOpenDelete(true)
+            }}
             onEdit={() => {
               setOpenEditModal(true)
               setBoardToUpdate(board)
@@ -120,6 +130,13 @@ const AllBoards = () => {
         creating={isUpdating}
         board={boardToUpdate}
         editFn={handleUpdateBoard}
+      />
+      <DeleteDialog 
+        type="board"
+        open={openDelete}
+        loading={isDeleting}
+        onClose={() => setOpenDelete(false)}
+        onConfirm={() => handleDeleteBoard(boardId)}
       />
     </div>
   )

@@ -25,6 +25,7 @@ import { Plus } from "lucide-react"
 import TaskModal from "@/components/TaskModal"
 import { limitText } from "@/utils/limtText"
 import { formatDate } from "@/utils/formatDate"
+import DeleteDialog from "@/components/DeleteDialog"
 
 const BoardPage = () => {
   const [lists, setLists] = useState<List[]>([])
@@ -34,6 +35,11 @@ const BoardPage = () => {
   const [selectedCardId, setSelectedCardId] = useState<string>("")
   const [openModal, setOpenModal] = useState(false)
   const [mode, setMode] = useState<ModalModes>("create")
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [deleteDialogType, setDeleteDialogType] = useState<"list" | "card">(
+    "list",
+  )
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const { id: boardId } = useParams()
   const { boards } = useBoardStore()
@@ -199,6 +205,7 @@ const BoardPage = () => {
   }
 
   const handleDeleteCard = async (cardId: string, listId: string) => {
+    setIsDeleting(true)
     try {
       await deleteCard(cardId)
 
@@ -216,6 +223,8 @@ const BoardPage = () => {
       })
     } catch (err) {
       console.error(err)
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -243,6 +252,7 @@ const BoardPage = () => {
   }
 
   const handleDeleteList = async (listId: string) => {
+    setIsDeleting(true)
     try {
       await deleteList(listId)
 
@@ -255,6 +265,8 @@ const BoardPage = () => {
       setCards(updatedCards)
     } catch (error) {
       console.log(error)
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -294,6 +306,30 @@ const BoardPage = () => {
     setSelectedListId("")
   }
 
+  const openDeleteDialog = ({
+    type,
+    listId,
+    cardId,
+  }: {
+    type: "list" | "card"
+    listId?: string
+    cardId?: string
+  }) => {
+    setShowDeleteDialog(true)
+    setDeleteDialogType(type)
+    switch (type) {
+      case "card": {
+        if (cardId) setSelectedCardId(cardId)
+        if (listId) setSelectedListId(listId)
+        return
+      }
+      case "list": {
+        if (listId) setSelectedListId(listId)
+        return
+      }
+    }
+  }
+
   useEffect(() => {
     fetchLists()
   }, [boardId])
@@ -329,7 +365,12 @@ const BoardPage = () => {
                             >
                               <TasksContainer
                                 title={list.title}
-                                onDelete={() => handleDeleteList(list._id)}
+                                onDelete={() =>
+                                  openDeleteDialog({
+                                    type: "list",
+                                    listId: list._id,
+                                  })
+                                }
                                 onAddTask={() => {
                                   handleOpenModal({
                                     modalMode: "create",
@@ -362,10 +403,11 @@ const BoardPage = () => {
                                               card.createdAt,
                                             )}
                                             onDelete={() =>
-                                              handleDeleteCard(
-                                                card._id,
-                                                list._id,
-                                              )
+                                              openDeleteDialog({
+                                                type: "card",
+                                                listId: list._id,
+                                                cardId: card._id,
+                                              })
                                             }
                                             onEdit={() =>
                                               handleOpenModal({
@@ -444,6 +486,18 @@ const BoardPage = () => {
               ? (data) => handleUpdateCard(selectedCardId, data)
               : undefined
         }
+      />
+
+      <DeleteDialog
+        open={showDeleteDialog}
+        type={deleteDialogType}
+        loading={isDeleting}
+        onConfirm={
+          deleteDialogType === "card"
+            ? () => handleDeleteCard(selectedCardId, selectedListId)
+            : () => handleDeleteList(selectedListId)
+        }
+        onClose={() => setShowDeleteDialog(false)}
       />
     </div>
   )
