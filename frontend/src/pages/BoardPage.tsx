@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react"
 import API from "../services/api"
-import type { Card, CreateCardPayload, List, UpdateCardPayload } from "../types"
+import type {
+  Card,
+  CreateCardPayload,
+  List,
+  ModalModes,
+  UpdateCardPayload,
+} from "../types"
 import {
   createCard,
   deleteCard,
@@ -17,25 +23,26 @@ import { useBoardStore } from "@/store/useBoardStore"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import TaskModal from "@/components/TaskModal"
+import { limitText } from "@/utils/limtText"
+import { formatDate } from "@/utils/formatDate"
 
 const BoardPage = () => {
   const [lists, setLists] = useState<List[]>([])
   const [cards, setCards] = useState<Record<string, Card[]>>({})
   const [newListTitle, setNewListTitle] = useState("")
-  const [openCreateCard, setOpenCreateCard] = useState(false)
-  const [openUpdateCard, setOpenUpdateCard] = useState(false)
   const [selectedListId, setSelectedListId] = useState<string>("")
   const [selectedCardId, setSelectedCardId] = useState<string>("")
-  const [readOnly, setReadOnly] = useState(false)
+  const [openModal, setOpenModal] = useState(false)
+  const [mode, setMode] = useState<ModalModes>("create")
+
   const { id: boardId } = useParams()
-  const navigate = useNavigate()
   const { boards } = useBoardStore()
+  const navigate = useNavigate()
 
   const board = boards?.find((board) => board._id === boardId)
-
-  const selectedCard =
-    selectedListId.trim() &&
-    cards[`${selectedListId}`].find((card) => card._id === selectedCardId)
+  const cardDetails = cards[`${selectedListId}`]?.find(
+    (card) => card._id === selectedCardId,
+  )
 
   const fetchLists = async () => {
     try {
@@ -212,24 +219,8 @@ const BoardPage = () => {
     }
   }
 
-  const handleDeleteList = async (listId: string) => {
-    try {
-      await deleteList(listId)
-
-      const updatedLists = lists.filter((list) => list._id !== listId)
-
-      const updatedCards = { ...cards }
-      delete updatedCards[listId]
-
-      setLists(updatedLists)
-      setCards(updatedCards)
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
   const handleUpdateCard = async (cardId: string, data: UpdateCardPayload) => {
-    if (!cardId?.trim()) return
+    if (!cardId) return
 
     try {
       const res = await updateCard(cardId, data)
@@ -249,6 +240,58 @@ const BoardPage = () => {
     } catch (error) {
       console.log(error)
     }
+  }
+
+  const handleDeleteList = async (listId: string) => {
+    try {
+      await deleteList(listId)
+
+      const updatedLists = lists.filter((list) => list._id !== listId)
+
+      const updatedCards = { ...cards }
+      delete updatedCards[listId]
+
+      setLists(updatedLists)
+      setCards(updatedCards)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const handleOpenModal = ({
+    modalMode,
+    cardId,
+    listId,
+  }: {
+    modalMode: ModalModes
+    cardId?: string
+    listId?: string
+  }) => {
+    setOpenModal(true)
+    setMode(modalMode)
+
+    switch (modalMode) {
+      case "edit": {
+        if (cardId) setSelectedCardId(cardId)
+        if (listId) setSelectedListId(listId)
+        return
+      }
+      case "view": {
+        if (cardId) setSelectedCardId(cardId)
+        if (listId) setSelectedListId(listId)
+        return
+      }
+      case "create": {
+        if (listId) setSelectedListId(listId)
+        return
+      }
+    }
+  }
+
+  const handleCloseModal = () => {
+    setOpenModal(false)
+    setSelectedCardId("")
+    setSelectedListId("")
   }
 
   useEffect(() => {
@@ -282,11 +325,18 @@ const BoardPage = () => {
                             <div
                               ref={provided.innerRef}
                               {...provided.droppableProps}
+                              className="rounded-lg h-[400px] overflow-x-auto"
                             >
                               <TasksContainer
                                 title={list.title}
                                 onDelete={() => handleDeleteList(list._id)}
-                                classNames="rounded-lg p-4"
+                                onAddTask={() => {
+                                  handleOpenModal({
+                                    modalMode: "create",
+                                    listId: list._id,
+                                  })
+                                }}
+                                classNames="p-4"
                               >
                                 <div className="space-y-3">
                                   {cards[list._id]?.map((card, index) => (
@@ -303,24 +353,34 @@ const BoardPage = () => {
                                         >
                                           <TaskCard
                                             title={card.title}
-                                            createdAt={card.createdAt}
+                                            labels={card.labels}
+                                            description={limitText(
+                                              card.description,
+                                              25,
+                                            )}
+                                            createdAt={formatDate(
+                                              card.createdAt,
+                                            )}
                                             onDelete={() =>
                                               handleDeleteCard(
                                                 card._id,
                                                 list._id,
                                               )
                                             }
-                                            onEdit={() => {
-                                              setOpenUpdateCard(true)
-                                              setSelectedListId(list._id)
-                                              setSelectedCardId(card._id)
-                                            }}
-                                            onOpen={() => {
-                                              setSelectedCardId(card._id)
-                                              setSelectedListId(list._id)
-                                              setOpenUpdateCard(true)
-                                              setReadOnly(true)
-                                            }}
+                                            onEdit={() =>
+                                              handleOpenModal({
+                                                modalMode: "edit",
+                                                listId: list._id,
+                                                cardId: card._id,
+                                              })
+                                            }
+                                            onOpen={() =>
+                                              handleOpenModal({
+                                                modalMode: "view",
+                                                listId: list._id,
+                                                cardId: card._id,
+                                              })
+                                            }
                                           />
                                         </div>
                                       )}
@@ -330,10 +390,12 @@ const BoardPage = () => {
                                 </div>
                                 <Button
                                   className="w-full bg-card text-gray-600 py-5 my-2"
-                                  onClick={() => {
-                                    setOpenCreateCard(true)
-                                    setSelectedListId(list._id)
-                                  }}
+                                  onClick={() =>
+                                    handleOpenModal({
+                                      modalMode: "create",
+                                      listId: list._id,
+                                    })
+                                  }
                                 >
                                   <Plus className="text-gray-600" />
                                   Add Task
@@ -352,41 +414,36 @@ const BoardPage = () => {
           )}
         </Droppable>
       </DragDropContext>
-      <div className="min-w-[250px]">
+      <div className="flex items-center gap-4 w-[600px] h-[50px] py-2">
         <input
           value={newListTitle}
           onChange={(e) => setNewListTitle(e.target.value)}
           placeholder="Add new list"
-          className="border p-2 w-full rounded"
+          className="border rounded h-full w-full"
         />
 
-        <button
-          onClick={handleAddList}
-          className="bg-blue-500 text-white px-3 py-1 mt-2 rounded"
-        >
+        <Button onClick={handleAddList} className="bg-blue-500 text-white">
           + Add List
-        </button>
+        </Button>
       </div>
+
       <TaskModal
-        open={openCreateCard}
-        onClose={() => setOpenCreateCard(false)}
-        onSubmit={(data) =>
-          handleAddCard({
-            ...data,
-            listId: selectedListId,
-            boardId,
-          })
+        open={openModal}
+        onClose={handleCloseModal}
+        cardData={mode !== "create" ? cardDetails : undefined}
+        readOnly={mode === "view"}
+        onSubmit={
+          mode === "create"
+            ? (data) =>
+                handleAddCard({
+                  ...data,
+                  listId: selectedListId,
+                  boardId,
+                })
+            : mode === "edit"
+              ? (data) => handleUpdateCard(selectedCardId, data)
+              : undefined
         }
-      />
-      <TaskModal
-        open={openUpdateCard}
-        onClose={() => {
-          setOpenUpdateCard(false)
-          setReadOnly(false)
-        }}
-        cardData={selectedCard || undefined}
-        onSubmit={(data) => handleUpdateCard(selectedCardId, data)}
-        readOnly={readOnly}
       />
     </div>
   )

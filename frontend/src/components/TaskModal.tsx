@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import type { Card, LabelData, UpdateCardPayload } from "@/types"
+import type { Card, LabelData } from "@/types"
 import { labelColors } from "@/constants/label-colors"
 
 interface TaskData {
@@ -23,7 +23,6 @@ interface TaskModalProps {
   open: boolean
   onClose: () => void
   onSubmit?: (data: TaskData) => void
-  onEdit?: (data: UpdateCardPayload) => void
   cardData?: Card
   readOnly?: boolean
 }
@@ -51,15 +50,29 @@ const TaskModal = ({
   })
 
   useEffect(() => {
-    if (open) {
-      if (cardData) {
-        setForm({ title: cardData.title, description: cardData.description })
-        setLabels(cardData?.labels ?? [])
-      }
-      setLabelInput({ text: "", color: labelColors[0].value })
-      setErrors({})
-      setSubmitted(false)
+    if (!open) return
+
+    if (cardData) {
+      setForm({
+        title: cardData.title,
+        description: cardData.description || "",
+      })
+      setLabels(cardData.labels ?? [])
+    } else {
+      setForm({
+        title: "",
+        description: "",
+      })
+      setLabels([])
     }
+
+    setLabelInput({
+      text: "",
+      color: labelColors[0].value,
+    })
+
+    setErrors({})
+    setSubmitted(false)
   }, [open, cardData])
 
   const validate = (f: TaskData): FormErrors => {
@@ -79,7 +92,7 @@ const TaskModal = ({
   const handleAddLabel = () => {
     if (!labelInput.text.trim()) return
     setLabels([...labels, { text: labelInput.text, color: labelInput.color }])
-    setLabelInput(prev => ({...prev, text: ""}))
+    setLabelInput((prev) => ({ ...prev, text: "" }))
   }
 
   const handleRemoveLabel = (identifier: string | number) => {
@@ -261,33 +274,23 @@ const TaskModal = ({
           </div>
 
           {/* Actions */}
-          {!readOnly ? (
-            <div className="flex justify-end gap-2 pt-2">
-              <Button
-                variant="outline"
-                onClick={onClose}
-                className="text-gray-600"
-              >
-                Cancel
-              </Button>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button
+              variant="outline"
+              onClick={onClose}
+              className="text-gray-600"
+            >
+              {!readOnly ? "Cancel" : "Close"}
+            </Button>
+            {!readOnly ? (
               <Button
                 onClick={handleSubmit}
                 className="bg-indigo-600 hover:bg-indigo-700 text-white"
               >
                 {isEditing ? "Update Task" : "Create Task"}
               </Button>
-            </div>
-          ) : (
-            <div className="flex justify-end pt-2">
-              <Button
-                onClick={onClose}
-                variant="outline"
-                className="text-gray-600"
-              >
-                Close
-              </Button>
-            </div>
-          )}
+            ) : null}
+          </div>
         </div>
       </DialogContent>
     </Dialog>

@@ -11,6 +11,7 @@ import type { ReactNode } from "react"
 interface TasksContainerProps {
   title?: string
   classNames?: string
+  onAddTask?: () => void
   onEdit?: () => void
   onDelete?: () => void
   children?: ReactNode
@@ -21,6 +22,7 @@ const TasksContainer = ({
   classNames,
   onEdit,
   onDelete,
+  onAddTask,
   children,
   ...props
 }: TasksContainerProps) => {
@@ -39,9 +41,9 @@ const TasksContainer = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={onEdit}>Edit</DropdownMenuItem>
+            <DropdownMenuItem onClick={onAddTask}>Add Task</DropdownMenuItem>
             <DropdownMenuItem onClick={onDelete} className="text-red-500">
-              Delete
+              Delete List
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

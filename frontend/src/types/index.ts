@@ -47,3 +47,5 @@ export interface UpdateCardPayload {
   description?: string
   labels?: LabelData[]
 }
+
+export type ModalModes = "view" | "edit" | "create"
