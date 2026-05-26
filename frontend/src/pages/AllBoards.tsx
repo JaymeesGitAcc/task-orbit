@@ -1,12 +1,12 @@
 import BoardModal from "@/components/BoardModal"
 import CustomCard from "@/components/CustomCard"
 import DeleteDialog from "@/components/DeleteDialog"
+import EmptyState from "@/components/EmptyState"
 import { Button } from "@/components/ui/button"
-import { useAuthStore } from "@/store/useAuthStore"
 import { useBoardStore } from "@/store/useBoardStore"
 import type { Board } from "@/types"
 import { limitText } from "@/utils/limtText"
-import { Plus } from "lucide-react"
+import { LayoutGrid, Plus } from "lucide-react"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
@@ -21,7 +21,6 @@ const AllBoards = () => {
   const [boardId, setBoardId] = useState<string | number>("")
   const [isDeleting, setIsDeleting] = useState(false)
   const { boards, addBoard, delBoard, editBoard } = useBoardStore()
-  const { user } = useAuthStore()
   const navigate = useNavigate()
 
   const handleCreateBoard = async (data: {
@@ -81,24 +80,31 @@ const AllBoards = () => {
   }
 
   return (
-    <div>
+    <div className="px-8">
       <div className="flex items-center gap-2 justify-between">
-        <h1>Boards</h1>
+        <h1 className="text-2xl font-semibold">Boards</h1>
         <div className="flex items-center gap-2">
           <Button size="lg" onClick={() => setOpenCreateModal(true)}>
             <Plus />
             Create Board
           </Button>
-          <div className="h-11 w-11 rounded-full bg-slate-400 flex items-center justify-center">
-            <p className="font-bold text-slate-100">
-              {user?.name?.slice(0, 1)}
-            </p>
-          </div>
         </div>
       </div>
 
       <div className="py-4 space-y-2 sm:grid sm:grid-cols-2 sm:gap-4 sm:space-y-0 md:grid-cols-3 lg:grid-cols-4">
-        {boards?.map((board) => (
+        <EmptyState
+          icon={<LayoutGrid className="w-6 h-6 text-gray-400" />}
+          title={boards.length ? "Add New Board" : "Create your first board"}
+          description={boards.length ? "Add a new board to your list" : "Create Board"}
+          action={
+            <Button size="lg" onClick={() => setOpenCreateModal(true)}>
+              <Plus />
+              {boards.length ? "Add Board" : "Create Board" }
+            </Button>
+          }
+        />
+
+        {boards.map((board) => (
           <CustomCard
             key={board._id}
             title={board.title}
@@ -131,7 +137,7 @@ const AllBoards = () => {
         board={boardToUpdate}
         editFn={handleUpdateBoard}
       />
-      <DeleteDialog 
+      <DeleteDialog
         type="board"
         open={openDelete}
         loading={isDeleting}
