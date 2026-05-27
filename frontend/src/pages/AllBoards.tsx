@@ -2,6 +2,7 @@ import BoardModal from "@/components/BoardModal"
 import CustomCard from "@/components/CustomCard"
 import DeleteDialog from "@/components/DeleteDialog"
 import EmptyState from "@/components/EmptyState"
+import CardSkeleton from "@/components/skeletons/CardSkeleton"
 import { Button } from "@/components/ui/button"
 import { useBoardStore } from "@/store/useBoardStore"
 import type { Board } from "@/types"
@@ -20,7 +21,7 @@ const AllBoards = () => {
   const [openDelete, setOpenDelete] = useState(false)
   const [boardId, setBoardId] = useState<string | number>("")
   const [isDeleting, setIsDeleting] = useState(false)
-  const { boards, addBoard, delBoard, editBoard } = useBoardStore()
+  const { boards, addBoard, delBoard, editBoard, loading } = useBoardStore()
   const navigate = useNavigate()
 
   const handleCreateBoard = async (data: {
@@ -92,37 +93,47 @@ const AllBoards = () => {
       </div>
 
       <div className="py-4 space-y-2 sm:grid sm:grid-cols-2 sm:gap-4 sm:space-y-0 md:grid-cols-3 lg:grid-cols-4">
-        <EmptyState
-          icon={<LayoutGrid className="w-6 h-6 text-gray-400" />}
-          title={boards.length ? "Add New Board" : "Create your first board"}
-          description={boards.length ? "Add a new board to your list" : "Create Board"}
-          action={
-            <Button size="lg" onClick={() => setOpenCreateModal(true)}>
-              <Plus />
-              {boards.length ? "Add Board" : "Create Board" }
-            </Button>
-          }
-        />
+        {loading ? (
+          Array.from({ length: 4 }).map((_, i) => <CardSkeleton key={i} />)
+        ) : (
+          <>
+            <EmptyState
+              icon={<LayoutGrid className="w-6 h-6 text-gray-400" />}
+              title={
+                boards.length ? "Add New Board" : "Create your first board"
+              }
+              description={
+                boards.length ? "Add a new board to your list" : "Create Board"
+              }
+              action={
+                <Button size="lg" onClick={() => setOpenCreateModal(true)}>
+                  <Plus />
+                  {boards.length ? "Add Board" : "Create Board"}
+                </Button>
+              }
+            />
 
-        {boards.map((board) => (
-          <CustomCard
-            key={board._id}
-            title={board.title}
-            description={limitText(board.description)}
-            icon={board.icon}
-            createdAt={board.createdAt}
-            id={board._id}
-            onOpen={() => navigate(`/boards/${board._id}`)}
-            onDelete={() => {
-              setBoardId(board._id)
-              setOpenDelete(true)
-            }}
-            onEdit={() => {
-              setOpenEditModal(true)
-              setBoardToUpdate(board)
-            }}
-          />
-        ))}
+            {boards.map((board) => (
+              <CustomCard
+                key={board._id}
+                title={board.title}
+                description={limitText(board.description)}
+                icon={board.icon}
+                createdAt={board.createdAt}
+                id={board._id}
+                onOpen={() => navigate(`/boards/${board._id}`)}
+                onDelete={() => {
+                  setBoardId(board._id)
+                  setOpenDelete(true)
+                }}
+                onEdit={() => {
+                  setOpenEditModal(true)
+                  setBoardToUpdate(board)
+                }}
+              />
+            ))}
+          </>
+        )}
       </div>
       <BoardModal
         open={openCreateModal}
