@@ -16,6 +16,7 @@ interface TaskCardProps {
   description?: string
   createdAt?: string
   labels?: LabelData[]
+  dueDate?: string
   onDelete?: () => void
   onEdit?: () => void
   onOpen?: () => void
@@ -26,11 +27,11 @@ interface TaskCardProps {
 const TaskCard = ({
   title,
   description,
-  createdAt,
   onOpen,
   labels = [],
   onDelete,
   onEdit,
+  dueDate,
   classnames,
   children,
 }: TaskCardProps) => {
@@ -89,9 +90,10 @@ const TaskCard = ({
         </div>
       )}
 
-      {createdAt && (
-        <div className="px-2 border-t pt-2">
-          <p className="text-[11px] text-gray-400">Created: {createdAt}</p>
+      {dueDate && (
+        <div className="flex justify-between border-t px-2 py-1 text-[11px] text-gray-600">
+          <p>Due Date:</p>
+          <p>{dueDate}</p>
         </div>
       )}
       {children}

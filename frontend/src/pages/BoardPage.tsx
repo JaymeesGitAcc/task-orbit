@@ -29,6 +29,7 @@ import DeleteDialog from "@/components/DeleteDialog"
 import ListModal from "@/components/ListModal"
 import { toast } from "sonner"
 import EmptyState from "@/components/EmptyState"
+import { format } from "date-fns"
 
 const BoardPage = () => {
   const [lists, setLists] = useState<List[]>([])
@@ -195,6 +196,7 @@ const BoardPage = () => {
     listId,
     boardId,
     labels,
+    dueDate,
   }: CreateCardPayload) => {
     if (!title.trim()) return
     if (!listId) return
@@ -207,6 +209,7 @@ const BoardPage = () => {
         listId,
         boardId,
         labels,
+        dueDate,
       })
 
       const newCard = res.data.data
@@ -215,7 +218,9 @@ const BoardPage = () => {
         ...prev,
         [listId]: [...(prev[listId] || []), newCard],
       }))
+      toast.success("Task Created Successfully!")
     } catch (err) {
+      toast.error("Something went wrong")
       console.error(err)
     }
   }
@@ -237,8 +242,10 @@ const BoardPage = () => {
         ...cards,
         [listId]: reOrdered,
       })
+      toast.success("Task Deleted Successfully!")
     } catch (err) {
       console.error(err)
+      toast.error("Something went wrong")
     } finally {
       setIsDeleting(false)
     }
@@ -248,7 +255,10 @@ const BoardPage = () => {
     if (!cardId) return
 
     try {
-      const res = await updateCard(cardId, data)
+      const res = await updateCard(cardId, {
+        ...data,
+        dueDate: data.dueDate || null,
+      })
       const updatedCard = res.data.data
 
       setCards((prev) => ({
@@ -262,8 +272,10 @@ const BoardPage = () => {
             : card,
         ),
       }))
+      toast.success("Task Updated Successfully")
     } catch (error) {
       console.log(error)
+      toast.error("Something went wrong")
     }
   }
 
@@ -394,7 +406,11 @@ const BoardPage = () => {
                     index={index}
                   >
                     {(provided) => (
-                      <div ref={provided.innerRef} {...provided.draggableProps} className="py-4">
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        className="py-4"
+                      >
                         {/* Drag handle */}
                         <div {...provided.dragHandleProps}>
                           <Droppable droppableId={list._id} type="CARD">
@@ -440,6 +456,11 @@ const BoardPage = () => {
                                                 card.description,
                                                 25,
                                               )}
+                                              dueDate={
+                                                card.dueDate
+                                                  ? `${format(String(card.dueDate), "MMM d, yy")}`
+                                                  : undefined
+                                              }
                                               createdAt={formatDate(
                                                 card.createdAt,
                                               )}

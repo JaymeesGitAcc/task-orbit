@@ -43,6 +43,10 @@ const cardSchema = new mongoose.Schema(
         },
       },
     ],
+    dueDate: {
+      type: Date,
+      default: null
+    }
   },
   { timestamps: true },
 )

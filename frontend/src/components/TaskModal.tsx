@@ -12,11 +12,14 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import type { Card, LabelData } from "@/types"
 import { labelColors } from "@/constants/label-colors"
+import PopupCalender from "./PopupCalender"
+import { format } from "date-fns"
 
 interface TaskData {
   title: string
   description?: string
   labels?: LabelData[]
+  dueDate?: Date | null
 }
 
 interface TaskModalProps {
@@ -48,6 +51,12 @@ const TaskModal = ({
     text: "",
     color: labelColors[0].value,
   })
+  const [openCalender, setOpenCalender] = useState(false)
+  const [dueDate, setDueDate] = useState<Date | undefined>(undefined)
+
+  const currentDueDate = dueDate
+    ? `${format(String(dueDate), "MMM d, yyyy")}`
+    : "Calender"
 
   useEffect(() => {
     if (!open) return
@@ -58,11 +67,13 @@ const TaskModal = ({
         description: cardData.description || "",
       })
       setLabels(cardData.labels ?? [])
+      setDueDate(cardData.dueDate || undefined)
     } else {
       setForm({
         title: "",
         description: "",
       })
+      setDueDate(undefined)
       setLabels([])
     }
 
@@ -115,8 +126,16 @@ const TaskModal = ({
       _id ? { _id, ...rest } : rest,
     )
 
-    onSubmit?.({ ...form, labels: cleanedLabels })
+    onSubmit?.({ ...form, dueDate, labels: cleanedLabels })
     onClose()
+  }
+
+  const handleCalenderState = (state: boolean) => {
+    setOpenCalender(state)
+  }
+
+  const handleDueDateChange = (date: Date | undefined) => {
+    setDueDate(date)
   }
 
   return (
@@ -170,13 +189,19 @@ const TaskModal = ({
           </div>
 
           {/* Description */}
-          <div className="space-y-1.5">
+          <div
+            className={`space-y-1.5 ${readOnly && !form.description ? "hidden" : ""}`}
+          >
             <Label
               htmlFor="description"
               className="text-sm font-medium text-gray-700"
             >
               Description{" "}
-              <span className="text-gray-400 font-normal">(optional)</span>
+              <span
+                className={`text-gray-400 font-normal ${readOnly || isEditing ? "hidden" : ""}`}
+              >
+                (optional)
+              </span>
             </Label>
             {!readOnly ? (
               <Textarea
@@ -194,35 +219,53 @@ const TaskModal = ({
             )}
           </div>
 
+          <div
+            className={`flex items-center justify-between border p-1 rounded-lg ${
+              readOnly && !dueDate ? "hidden" : ""
+            }`}
+          >
+            <span className="text-gray-700 font-semibold">Due Date:</span>
+
+            {/* Calender for picking date */}
+            <PopupCalender
+              open={openCalender}
+              onOpen={handleCalenderState}
+              title={currentDueDate}
+              date={dueDate}
+              onDateChange={handleDueDateChange}
+              disabled={readOnly}
+            />
+          </div>
+
           {/* Labels */}
-          <div className="space-y-3 border border-gray-200 rounded-xl p-3">
+          <div
+            className={`space-y-3 border rounded-xl p-3 ${readOnly && !labels.length ? "hidden" : ""}`}
+          >
             <div className="flex items-center gap-1.5">
               <Tag className="w-3.5 h-3.5 text-gray-500" />
               <span className="text-sm font-medium text-gray-700">Labels</span>
             </div>
 
             {/* Added labels */}
-            {labels?.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {labels.map((l, i) => (
-                  <span
-                    key={l._id ?? i}
-                    className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${colorMeta(l.color)?.badge ?? "bg-gray-100 text-gray-700"}`}
-                  >
-                    {l.text}
-                    {!readOnly && (
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveLabel(l._id ?? i)}
-                        className="hover:opacity-70"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    )}
-                  </span>
-                ))}
-              </div>
-            )}
+            <div className="flex flex-wrap gap-1.5">
+              {labels.map((l, i) => (
+                <span
+                  key={l._id ?? i}
+                  className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${colorMeta(l.color)?.badge ?? "bg-gray-100 text-gray-700"}`}
+                >
+                  {l.text}
+                  {!readOnly && (
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveLabel(l._id ?? i)}
+                      className="hover:opacity-70"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </span>
+              ))}
+            </div>
 
             {/* Label input */}
             {!readOnly && (
@@ -239,7 +282,7 @@ const TaskModal = ({
                   className="text-sm"
                 />
 
-                {/* Color swatches + Add button */}
+                {/* Color switches + Add button */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     {labelColors.map((c) => (

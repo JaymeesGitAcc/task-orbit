@@ -6,6 +6,7 @@ export interface Card {
   listId: string
   boardId: string
   order: number
+  dueDate?: Date | null
   createdAt?: string
   updatedAt?: string
 }
@@ -40,12 +41,14 @@ export interface CreateCardPayload {
   boardId: string | undefined
   description?: string
   labels?: LabelData[]
+  dueDate?: Date | null
 }
 
 export interface UpdateCardPayload {
   title: string
   description?: string
   labels?: LabelData[]
+  dueDate?: Date | null
 }
 
 export type ModalModes = "view" | "edit" | "create"
