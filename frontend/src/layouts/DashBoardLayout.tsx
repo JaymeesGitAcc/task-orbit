@@ -1,34 +1,23 @@
 import CustomSelect from "@/components/CustomSelect"
 import Logo from "@/components/Logo"
+import ResponsiveSidebar from "@/components/ResponsiveSidebar"
 import ToolTipped from "@/components/ToolTipped"
 import { Button } from "@/components/ui/button"
 import { icons } from "@/constants/icons"
+import { staticSideBarListItems } from "@/constants/sidebarListItems"
 import { useAuthStore } from "@/store/useAuthStore"
 import { useBoardStore } from "@/store/useBoardStore"
-import {
-  ChevronsLeft,
-  ChevronsRight,
-  KanbanSquare,
-  LayoutGrid,
-  LogOut,
-  Settings,
-} from "lucide-react"
+import { limitText } from "@/utils/limtText"
+import { ChevronsLeft, ChevronsRight, LayoutGrid, LogOut } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom"
 
-const formatBoardTitle = (title: string) => {
-  if (title.length > 18) {
-    title = title.split("").slice(0, 15).join("") + "..."
-  }
-  return title
-}
-
 const DashBoardLayout = () => {
   const [openSideBar, setOpenSideBar] = useState(true)
-
   const { boards, loading, fetchBoards } = useBoardStore()
   const [boardOption, setBoardOption] = useState("")
-  const {user, logout } = useAuthStore()
+  const [openMobileMenu, setOpenMobileMenu] = useState(false)
+  const { user, logout } = useAuthStore()
   const navigate = useNavigate()
   const location = useLocation()
   const { pathname: path } = location
@@ -53,19 +42,6 @@ const DashBoardLayout = () => {
       {openSideBar && "Logout"}
     </Button>
   )
-
-  const staticSideBarListItems = [
-    {
-      path: "/boards",
-      label: "All Boards",
-      icon: KanbanSquare,
-    },
-    {
-      path: "/settings",
-      label: "Settings",
-      icon: Settings,
-    },
-  ]
 
   useEffect(() => {
     const parts = path.split("/")
@@ -93,10 +69,10 @@ const DashBoardLayout = () => {
   }, [])
 
   return (
-    <div className="h-screen max-w-[1440px] mx-auto">
+    <div className="md:h-screen max-w-[1440px] mx-auto">
       <div className="h-full border flex">
         <aside
-          className={`bg-sidebar relative transition-all duration-300 ${openSideBar ? "w-74" : "w-20"}`}
+          className={`hidden md:block bg-sidebar relative transition-all duration-300 ${openSideBar ? "w-74" : "w-20"}`}
         >
           <Button
             size="lg"
@@ -173,9 +149,7 @@ const DashBoardLayout = () => {
                     } ${!openSideBar ? "justify-center" : ""}`}
                   >
                     <Icon size={18} />
-                    {openSideBar && (
-                      <span>{formatBoardTitle(board.title)}</span>
-                    )}
+                    {openSideBar && <span>{limitText(board.title, 20)}</span>}
                   </Link>
                 )
                 return !openSideBar ? (
@@ -194,28 +168,37 @@ const DashBoardLayout = () => {
             )}
           </div>
         </aside>
-        <section className="w-full h-screen overflow-y-auto">
+        <section className="w-full min-h-screen flex flex-col overflow-hidden">
           {/* Placeholder component for nested routing */}
-          <div className="px-8 py-5">
-            <div className="flex items-center justify-between gap-2">
-              <CustomSelect
-                options={boardOptions}
-                value={boardOption}
-                onChange={(value) => {
-                  setBoardOption(value)
-                  navigate(`/boards/${value}`)
-                }}
-                placeholder="Select Board"
-                className="w-64"
+          <div className="px-8 py-5 flex-shrink-0">
+            <div className="flex items-center justify-between gap-4">
+              <ResponsiveSidebar
+                open={openMobileMenu}
+                onOpenChange={setOpenMobileMenu}
+                className="md:hidden"
               />
-              <div className="h-11 w-11 rounded-full bg-slate-400 flex items-center justify-center">
-                <p className="font-bold text-slate-100">
-                  {user?.name?.slice(0, 1)}
-                </p>
+              <div className="flex items-center justify-between gap-2 w-full">
+                <CustomSelect
+                  options={boardOptions}
+                  value={boardOption}
+                  onChange={(value) => {
+                    setBoardOption(value)
+                    navigate(`/boards/${value}`)
+                  }}
+                  placeholder="Select Board"
+                  className="w-64"
+                />
+                <div className="h-11 w-11 rounded-full bg-slate-400 flex items-center justify-center">
+                  <p className="font-bold text-slate-100">
+                    {user?.name?.slice(0, 1)}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-          <Outlet />
+          <div className="flex-1 min-h-0">
+            <Outlet />
+          </div>
         </section>
       </div>
     </div>
