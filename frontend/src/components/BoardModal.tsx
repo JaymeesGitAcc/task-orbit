@@ -76,7 +76,10 @@ const BoardModal = ({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md rounded-2xl p-6 gap-0 [&>button]:hidden">
+      <DialogContent
+        className="sm:max-w-md rounded-2xl p-6 gap-0 [&>button]:hidden"
+        aria-describedby={undefined}
+      >
         <DialogHeader className="flex flex-row items-center justify-between mb-4">
           <DialogTitle className="text-lg font-semibold text-gray-900">
             {!board ? "Create New Board" : "Update Board"}

@@ -24,7 +24,7 @@ const TaskCardSkeleton = () => (
 
 const ListSkeleton = ({ classnames }: { classnames?: string }) => {
   return (
-    <div className={`flex flex-col gap-3 w-64 ${classnames} bg-sidebar p-4 rounded-lg overflow-hidden`}>
+    <div className={`flex flex-col gap-3 w-[280px] ${classnames} bg-sidebar p-4 rounded-lg overflow-hidden`}>
       {/* List header */}
       <div className="flex items-center justify-between px-1">
         <Skeleton className="h-5 w-24 rounded-md" />

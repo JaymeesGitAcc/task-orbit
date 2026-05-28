@@ -368,8 +368,8 @@ const BoardPage = () => {
   }, [boardId])
 
   return (
-    <div className="px-8">
-      <div className="my-4">
+    <div className="flex flex-col h-full">
+      <div className="px-8 my-4 flex-shrink-0">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold ">{board?.title}</h1>
           <Button onClick={() => setOpenListModal(true)}>
@@ -381,163 +381,167 @@ const BoardPage = () => {
           {board?.description}
         </p>
       </div>
-      {!listsLoading ? (
-        <>
-          {!lists.length ? (
-            <EmptyState
-              classNames="w-50"
-              icon={<ListIcon size={18} />}
-              title="No List"
-              action={
-                <>
-                  <Button onClick={() => setOpenListModal(true)}>
-                    <Plus />
-                    Add List
-                  </Button>
-                </>
-              }
-            />
-          ) : (
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable
-                droppableId="all-lists"
-                direction="horizontal"
-                type="LIST"
-              >
-                {(provided) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4"
-                  >
-                    {lists?.map((list, index) => (
-                      <Draggable
-                        key={list._id}
-                        draggableId={list._id}
-                        index={index}
-                      >
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            className="py-4"
-                          >
-                            {/* Drag handle */}
-                            <div {...provided.dragHandleProps}>
-                              <Droppable droppableId={list._id} type="CARD">
-                                {(provided) => (
-                                  <div
-                                    ref={provided.innerRef}
-                                    {...provided.droppableProps}
-                                    className="rounded-lg h-[400px] overflow-x-auto"
-                                  >
-                                    <TasksContainer
-                                      title={list.title}
-                                      onDelete={() =>
-                                        openDeleteDialog({
-                                          type: "list",
-                                          listId: list._id,
-                                        })
-                                      }
-                                      onAddTask={() => {
-                                        handleOpenModal({
-                                          modalMode: "create",
-                                          listId: list._id,
-                                        })
-                                      }}
-                                      classNames="p-4"
+      <div className="overflow-x-auto overflow-y-auto flex-1 min-h-0 px-8 pb-8">
+        {!listsLoading ? (
+          <>
+            {!lists.length ? (
+              <EmptyState
+                classNames="w-50"
+                icon={<ListIcon size={18} />}
+                title="No List"
+                action={
+                  <>
+                    <Button onClick={() => setOpenListModal(true)}>
+                      <Plus />
+                      Add List
+                    </Button>
+                  </>
+                }
+              />
+            ) : (
+              <DragDropContext onDragEnd={handleDragEnd}>
+                <Droppable
+                  droppableId="all-lists"
+                  direction="horizontal"
+                  type="LIST"
+                >
+                  {(provided) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className="flex gap-4"
+                    >
+                      {lists?.map((list, index) => (
+                        <Draggable
+                          key={list._id}
+                          draggableId={list._id}
+                          index={index}
+                        >
+                          {(provided) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              className="py-4"
+                            >
+                              {/* Drag handle */}
+                              <div {...provided.dragHandleProps}>
+                                <Droppable droppableId={list._id} type="CARD">
+                                  {(provided) => (
+                                    <div
+                                      ref={provided.innerRef}
+                                      {...provided.droppableProps}
+                                      className="w-[280px]"
                                     >
-                                      <div className="space-y-3">
-                                        {cards[list._id]?.map((card, index) => (
-                                          <Draggable
-                                            key={card._id}
-                                            draggableId={card._id}
-                                            index={index}
-                                          >
-                                            {(provided) => (
-                                              <div
-                                                ref={provided.innerRef}
-                                                {...provided.draggableProps}
-                                                {...provided.dragHandleProps}
-                                              >
-                                                <TaskCard
-                                                  title={card.title}
-                                                  labels={card.labels}
-                                                  description={limitText(
-                                                    card.description,
-                                                    25,
-                                                  )}
-                                                  dueDate={
-                                                    card.dueDate
-                                                      ? `${format(String(card.dueDate), "MMM d, yy")}`
-                                                      : undefined
-                                                  }
-                                                  createdAt={formatDate(
-                                                    card.createdAt,
-                                                  )}
-                                                  onDelete={() =>
-                                                    openDeleteDialog({
-                                                      type: "card",
-                                                      listId: list._id,
-                                                      cardId: card._id,
-                                                    })
-                                                  }
-                                                  onEdit={() =>
-                                                    handleOpenModal({
-                                                      modalMode: "edit",
-                                                      listId: list._id,
-                                                      cardId: card._id,
-                                                    })
-                                                  }
-                                                  onOpen={() =>
-                                                    handleOpenModal({
-                                                      modalMode: "view",
-                                                      listId: list._id,
-                                                      cardId: card._id,
-                                                    })
-                                                  }
-                                                />
-                                              </div>
-                                            )}
-                                          </Draggable>
-                                        ))}
-                                        {provided.placeholder}
-                                      </div>
-                                      <Button
-                                        className="w-full bg-card text-gray-600 py-5 my-2"
-                                        onClick={() =>
+                                      <TasksContainer
+                                        title={list.title}
+                                        onDelete={() =>
+                                          openDeleteDialog({
+                                            type: "list",
+                                            listId: list._id,
+                                          })
+                                        }
+                                        onAddTask={() => {
                                           handleOpenModal({
                                             modalMode: "create",
                                             listId: list._id,
                                           })
-                                        }
+                                        }}
+                                        classNames="p-4 rounded-lg"
                                       >
-                                        <Plus className="text-gray-600" />
-                                        Add Task
-                                      </Button>
-                                    </TasksContainer>
-                                  </div>
-                                )}
-                              </Droppable>
+                                        <div className="space-y-3">
+                                          {cards[list._id]?.map(
+                                            (card, index) => (
+                                              <Draggable
+                                                key={card._id}
+                                                draggableId={card._id}
+                                                index={index}
+                                              >
+                                                {(provided) => (
+                                                  <div
+                                                    ref={provided.innerRef}
+                                                    {...provided.draggableProps}
+                                                    {...provided.dragHandleProps}
+                                                  >
+                                                    <TaskCard
+                                                      title={card.title}
+                                                      labels={card.labels}
+                                                      description={limitText(
+                                                        card.description,
+                                                        30,
+                                                      )}
+                                                      dueDate={
+                                                        card.dueDate
+                                                          ? `${format(String(card.dueDate), "MMM d, yy")}`
+                                                          : undefined
+                                                      }
+                                                      createdAt={formatDate(
+                                                        card.createdAt,
+                                                      )}
+                                                      onDelete={() =>
+                                                        openDeleteDialog({
+                                                          type: "card",
+                                                          listId: list._id,
+                                                          cardId: card._id,
+                                                        })
+                                                      }
+                                                      onEdit={() =>
+                                                        handleOpenModal({
+                                                          modalMode: "edit",
+                                                          listId: list._id,
+                                                          cardId: card._id,
+                                                        })
+                                                      }
+                                                      onOpen={() =>
+                                                        handleOpenModal({
+                                                          modalMode: "view",
+                                                          listId: list._id,
+                                                          cardId: card._id,
+                                                        })
+                                                      }
+                                                    />
+                                                  </div>
+                                                )}
+                                              </Draggable>
+                                            ),
+                                          )}
+                                          {provided.placeholder}
+                                        </div>
+                                        <Button
+                                          className="w-full bg-card text-gray-600 py-5 my-2"
+                                          onClick={() =>
+                                            handleOpenModal({
+                                              modalMode: "create",
+                                              listId: list._id,
+                                            })
+                                          }
+                                        >
+                                          <Plus className="text-gray-600" />
+                                          Add Task
+                                        </Button>
+                                      </TasksContainer>
+                                    </div>
+                                  )}
+                                </Droppable>
+                              </div>
                             </div>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </DragDropContext>
-          )}
-        </>
-      ) : (
-        <div className="flex gap-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <ListSkeleton key={i} />
-          ))}
-        </div>
-      )}
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </DragDropContext>
+            )}
+          </>
+        ) : (
+          <div className="flex gap-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <ListSkeleton key={i} />
+            ))}
+          </div>
+        )}
+      </div>
 
       <TaskModal
         open={openModal}

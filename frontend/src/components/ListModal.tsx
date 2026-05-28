@@ -14,10 +14,15 @@ interface ListModalProps {
   open: boolean
   onClose: () => void
   onSubmit?: (data: { title: string }) => void
-  inProgress?: boolean 
+  inProgress?: boolean
 }
 
-const ListModal = ({ open, onClose, onSubmit, inProgress = false }: ListModalProps) => {
+const ListModal = ({
+  open,
+  onClose,
+  onSubmit,
+  inProgress = false,
+}: ListModalProps) => {
   const [title, setTitle] = useState("")
   const [error, setError] = useState("")
   const [submitted, setSubmitted] = useState(false)
@@ -51,7 +56,10 @@ const ListModal = ({ open, onClose, onSubmit, inProgress = false }: ListModalPro
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md rounded-2xl p-6 gap-0 [&>button]:hidden">
+      <DialogContent
+        className="sm:max-w-md rounded-2xl p-6 gap-0 [&>button]:hidden"
+        aria-describedby={undefined}
+      >
         <DialogHeader className="flex flex-row items-center justify-between mb-4">
           <DialogTitle className="text-lg font-semibold text-gray-900">
             Create New List
