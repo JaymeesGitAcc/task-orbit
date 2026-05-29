@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema(
     name: {
       type: String,
       required: [true, "Name is required"],
-      trim: true
+      trim: true,
     },
     email: {
       type: String,
@@ -16,6 +16,26 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, "Password is required"],
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verificationToken: {
+      type: String,
+      default: undefined,
+    },
+    verificationTokenExpires: {
+      type: Date,
+      default: undefined,
+    },
+    resetPasswordToken: {
+      type: String,
+      default: undefined,
+    },
+    resetPasswordTokenExpires: {
+      type: Date,
+      default: undefined,
     },
   },
   { timestamps: true },

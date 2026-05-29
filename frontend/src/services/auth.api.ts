@@ -7,4 +7,7 @@ export const signupUser = (data: {
   name: string
   email: string
   password: string
-}) => API.post("/auth/signup", data)
+}) => API.post("/auth", data)
+
+export const verifyEmail = (token: string) =>
+  API.post("/auth/verify-email", { token })

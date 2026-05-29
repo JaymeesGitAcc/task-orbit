@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
-import { loginUser } from "@/services/auth.api"
+import { loginUser, signupUser } from "@/services/auth.api"
 
 type User = {
   _id: string
@@ -13,6 +13,10 @@ type AuthState = {
   user: User | null
   loading: boolean
   error: string | null
+  signup: (
+    data: { name: string; email: string; password: string },
+    cb?: () => void,
+  ) => Promise<void>
   login: (
     data: { email: string; password: string },
     cb?: () => void,
@@ -27,7 +31,17 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       loading: false,
       error: null,
-
+      signup: async (fields, cb) => {
+        set({ error: null })
+        try {
+          await signupUser(fields)
+          cb?.()
+        } catch (err: any) {
+          set({
+            error: err.response?.data?.message || "SignUp failed",
+          })
+        }
+      },
       login: async (credentials, cb) => {
         try {
           set({ loading: true, error: null })

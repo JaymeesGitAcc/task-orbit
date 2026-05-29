@@ -5,6 +5,7 @@ import BoardPage from "@/pages/BoardPage"
 import Login from "@/pages/Login"
 import Settings from "@/pages/Settings"
 import SignUp from "@/pages/SignUp"
+import VerifyEmail from "@/pages/VerifyEmail"
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
 import { Toaster } from "sonner"
 
@@ -50,6 +51,7 @@ const AppRoutes = () => {
           </Route>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
         </Routes>
       </BrowserRouter>
     </>
