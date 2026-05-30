@@ -11,3 +11,14 @@ export const signupUser = (data: {
 
 export const verifyEmail = (token: string) =>
   API.post("/auth/verify-email", { token })
+
+export const passwordResetLink = (email: string) =>
+  API.post("/auth/forgot-password", { email })
+
+export const resetPassword = ({
+  token,
+  password,
+}: {
+  token: string
+  password: string
+}) => API.post(`/auth/reset-password/${token}`, { password })

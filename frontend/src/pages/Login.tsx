@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useAuthStore } from "@/store/useAuthStore"
+import { passwordResetLink } from "@/services/auth.api"
+import { toast } from "sonner"
 
 interface FormState {
   email: string
@@ -56,6 +58,19 @@ const Login = () => {
     if (Object.keys(errs).length > 0) return
 
     await login(form, () => navigate("/boards"))
+  }
+
+  const requestPasswordResetLink = async () => {
+    try {
+      const res = await passwordResetLink(form.email)
+      if (res?.data?.data) {
+        toast.success(`Password Reset Link sent to ${form.email}`, {
+          position: "top-center",
+        })
+      }
+    } catch (error) {
+      toast.error("Something went wrong", { position: "top-center" })
+    }
   }
 
   if (user) return <Navigate to="/boards" replace />
@@ -146,6 +161,7 @@ const Login = () => {
               </Label>
             </div>
             <button
+              onClick={requestPasswordResetLink}
               type="button"
               className="text-sm text-primary hover:underline"
             >

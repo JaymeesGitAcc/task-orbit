@@ -1,5 +1,8 @@
 import User from "../models/user.model.js"
-import { generateVerificationEmail } from "../utils/emailTemplates.js"
+import {
+  generatePasswordResetEmail,
+  generateVerificationEmail,
+} from "../utils/emailTemplates.js"
 import { sendError, sendSuccess } from "../utils/response.js"
 import { sendEmail } from "../utils/sendEmail.js"
 import { generateToken } from "../utils/token.js"
@@ -138,6 +141,78 @@ export const verifyEmail = async (req, res) => {
     console.error("verifyEmail error:", error)
     return sendError(res, 500, "Unable to Verify email", {
       success: false,
+    })
+  }
+}
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body
+
+    if (!email) return sendError(res, 400, "Email is required")
+
+    const user = await User.findOne({ email })
+
+    if (!user) return sendError(res, 404, "No user with that email")
+
+    const rawToken = crypto.randomBytes(32).toString("hex")
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(rawToken)
+      .digest("hex")
+
+    user.resetPasswordToken = hashedToken
+    user.resetPasswordTokenExpires = Date.now() + 15 * 60 * 1000 // 15 min
+    await user.save()
+
+    const resetURL = `${process.env.EMAIL_FRONTEND_URL}/reset-password?token=${rawToken}`
+
+    const { htmlContent, textContent } = generatePasswordResetEmail(
+      user?.name,
+      resetURL,
+    )
+
+    sendEmail(user.email, "Password Reset Request", htmlContent, textContent)
+
+    return sendSuccess(res, 200, "Password reset link sent to your email", {
+      success: true,
+      message: "Password reset link sent to your email",
+    })
+  } catch (error) {
+    return sendError(res, 500, error.message)
+  }
+}
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params
+    const { password } = req.body
+
+    if (!password) return sendError(res, 400, "Password is required")
+
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex")
+
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordTokenExpires: { $gt: Date.now() },
+    })
+
+    if (!user) return sendError(res, 400, "Invalid or expired reset link")
+
+    user.password = password
+    user.resetPasswordToken = undefined
+    user.resetPasswordTokenExpires = undefined
+
+    await user.save()
+
+    return sendSuccess(res, 200, "Password reset successful", {
+      success: true,
+      message: "Password Rest Successful",
+    })
+  } catch (error) {
+    return sendError(res, 500, error.message, {
+      success: false,
+      message: "Internal Server Error",
     })
   }
 }

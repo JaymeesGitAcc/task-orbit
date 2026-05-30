@@ -3,6 +3,7 @@ import DashBoardLayout from "@/layouts/DashBoardLayout"
 import AllBoards from "@/pages/AllBoards"
 import BoardPage from "@/pages/BoardPage"
 import Login from "@/pages/Login"
+import ResetPassword from "@/pages/ResetPassword"
 import Settings from "@/pages/Settings"
 import SignUp from "@/pages/SignUp"
 import VerifyEmail from "@/pages/VerifyEmail"
@@ -52,6 +53,7 @@ const AppRoutes = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
         </Routes>
       </BrowserRouter>
     </>
