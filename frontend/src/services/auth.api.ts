@@ -22,3 +22,8 @@ export const resetPassword = ({
   token: string
   password: string
 }) => API.post(`/auth/reset-password/${token}`, { password })
+
+export const updatePassword = (data: {
+  currentPassword: string
+  newPassword: string
+}) => API.patch("/auth/update-password", data)

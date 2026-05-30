@@ -216,3 +216,45 @@ export const resetPassword = async (req, res) => {
     })
   }
 }
+
+export const updatePassword = async (req, res) => {
+  const { currentPassword, newPassword } = req.body
+  const userId = req.user._id
+
+  try {
+    if (!newPassword?.trim())
+      return sendError(res, 401, "New Password is required", {
+        success: false,
+        message: "New Password to set is missing",
+      })
+
+    const user = await User.findById(userId)
+
+    if (!user)
+      return sendError(res, 404, "User Not found", {
+        success: false,
+        message: "User Not found",
+      })
+
+    const passwordMatching = await user.isPasswordCorrect(currentPassword)
+
+    if (!passwordMatching)
+      return sendError(res, 401, "Incorrect Password", {
+        success: false,
+        message: "Incorrect Password",
+      })
+
+    user.password = newPassword
+    await user.save()
+
+    return sendSuccess(res, 201, "Password changed successfully", {
+      success: true,
+      message: "Password changed successfully",
+    })
+  } catch (error) {
+    return sendError(res, 500, "Internal Server Error", {
+      success: false,
+      message: "Couldn't update password",
+    })
+  }
+}
