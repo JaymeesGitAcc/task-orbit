@@ -4,7 +4,7 @@ const mailGenerator = new Mailgen({
   theme: "default",
   product: {
     name: "Task Orbit",
-    link: "http://localhost:5173",
+    link: `${process.env.EMAIL_FRONTEND_URL}`,
   },
 })
 

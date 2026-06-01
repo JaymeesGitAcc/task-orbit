@@ -68,11 +68,8 @@ export const deleteBoard = async (req, res) => {
     if (!board) return sendError(res, 404, "Board not found")
 
     await Card.deleteMany({ boardId })
-    console.log("All Cards deleted")
     await List.deleteMany({ boardId })
-    console.log("All List deleted")
     await Board.findByIdAndDelete(boardId)
-    console.log("Board Deleted")
 
     return sendSuccess(res, 200, "Board deleted Successfully")
   } catch (error) {
