@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-import API from "../services/api"
 import type {
   Card,
   CreateCardPayload,
@@ -15,7 +14,12 @@ import {
   updateCard,
 } from "../services/card.api"
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd"
-import { createList, deleteList, moveList } from "../services/list.api"
+import {
+  createList,
+  deleteList,
+  getLists,
+  moveList,
+} from "../services/list.api"
 import { useNavigate, useParams } from "react-router-dom"
 import TaskCard from "@/components/TaskCard"
 import TasksContainer from "@/components/TasksContainer"
@@ -59,8 +63,9 @@ const BoardPage = () => {
 
   const fetchLists = async () => {
     setListsLoading(true)
+    if (!boardId) return
     try {
-      const res = await API.get(`/lists/${boardId}`)
+      const res = await getLists(boardId)
       const listsData = res.data.data
       setLists(listsData)
 

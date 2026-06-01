@@ -1,5 +1,7 @@
 import API from "./api"
 
+export const getLists = (boardId: string) => API.get(`/api/lists/${boardId}`)
+
 export const createList = (title: string, boardId: string | undefined) => {
   return API.post("/api/lists", { title, boardId })
 }
