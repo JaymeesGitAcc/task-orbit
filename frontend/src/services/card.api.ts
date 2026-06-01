@@ -2,7 +2,7 @@ import type { CreateCardPayload, UpdateCardPayload } from "@/types"
 import API from "./api"
 
 export const getCardsByList = async (listId: string) => {
-  return API.get(`/cards/${listId}`)
+  return API.get(`/api/cards/${listId}`)
 }
 
 export const moveCard = (
@@ -10,20 +10,20 @@ export const moveCard = (
   targetListId: string,
   targetOrder: number,
 ) => {
-  return API.put(`/cards/${cardId}/move`, {
+  return API.put(`/api/cards/${cardId}/move`, {
     targetListId,
     targetOrder,
   })
 }
 
 export const createCard = (data: CreateCardPayload) => {
-  return API.post("/cards", data)
+  return API.post("/api/cards", data)
 }
 
 export const deleteCard = (cardId: string) => {
-  return API.delete(`/cards/${cardId}`)
+  return API.delete(`/api/cards/${cardId}`)
 }
 
 export const updateCard = (cardId: string, data: UpdateCardPayload) => {
-  return API.patch(`/cards/${cardId}`, data)
+  return API.patch(`/api/cards/${cardId}`, data)
 }

@@ -1,11 +1,11 @@
 import API from "./api"
 
-export const getBoards = () => API.get("/boards")
+export const getBoards = () => API.get("/api/boards")
 
 export const createBoard = (data: { title: string; description?: string }) =>
-  API.post("/boards", data)
+  API.post("/api/boards", data)
 
-export const deleteBoard = (boardId: string) => API.delete(`/boards/${boardId}`)
+export const deleteBoard = (boardId: string) => API.delete(`/api/boards/${boardId}`)
 
 export const updateBoard = (
   boardId: string,
@@ -14,4 +14,4 @@ export const updateBoard = (
     description?: string
     icon?: string
   },
-) => API.patch(`/boards/${boardId}`, data)
+) => API.patch(`/api/boards/${boardId}`, data)
