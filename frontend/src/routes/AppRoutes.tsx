@@ -2,6 +2,7 @@ import ProtectedRoute from "@/components/ProtectedRoute"
 import DashBoardLayout from "@/layouts/DashBoardLayout"
 import AllBoards from "@/pages/AllBoards"
 import BoardPage from "@/pages/BoardPage"
+import LandingPage from "@/pages/LandingPage"
 import Login from "@/pages/Login"
 import ResetPassword from "@/pages/ResetPassword"
 import Settings from "@/pages/Settings"
@@ -16,8 +17,18 @@ const AppRoutes = () => {
       <Toaster />
       <BrowserRouter>
         <Routes>
+          {/* Landing Page Route */}
+          <Route path="/" element={<LandingPage />} />
+
+          {/* Auth Routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+
+          {/* Protected App */}
           <Route
-            path="/"
+            path="/app"
             element={
               <ProtectedRoute>
                 <DashBoardLayout />
@@ -25,35 +36,10 @@ const AppRoutes = () => {
             }
           >
             <Route index element={<Navigate to="boards" replace />} />
-            <Route
-              path="boards"
-              element={
-                <ProtectedRoute>
-                  <AllBoards />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="settings"
-              element={
-                <ProtectedRoute>
-                  <Settings />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="boards/:id"
-              element={
-                <ProtectedRoute>
-                  <BoardPage />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="boards" element={<AllBoards />} />
+            <Route path="boards/:id" element={<BoardPage />} />
+            <Route path="settings" element={<Settings />} />
           </Route>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/verify-email" element={<VerifyEmail />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
         </Routes>
       </BrowserRouter>
     </>

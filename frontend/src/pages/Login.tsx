@@ -57,7 +57,7 @@ const Login = () => {
     setErrors(errs)
     if (Object.keys(errs).length > 0) return
 
-    await login(form, () => navigate("/boards"))
+    await login(form, () => navigate("/app/boards"))
   }
 
   const requestPasswordResetLink = async () => {
@@ -73,7 +73,7 @@ const Login = () => {
     }
   }
 
-  if (user) return <Navigate to="/boards" replace />
+  if (user) return <Navigate to="/app/boards" replace />
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">

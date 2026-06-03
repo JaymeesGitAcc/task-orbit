@@ -121,7 +121,7 @@ const AllBoards = () => {
                 icon={board.icon}
                 createdAt={board.createdAt}
                 id={board._id}
-                onOpen={() => navigate(`/boards/${board._id}`)}
+                onOpen={() => navigate(`/app/boards/${board._id}`)}
                 onDelete={() => {
                   setBoardId(board._id)
                   setOpenDelete(true)

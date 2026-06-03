@@ -32,7 +32,7 @@ const DashBoardLayout = () => {
   const LogoutButton = (
     <Button
       onClick={() => {
-        logout(() => navigate("/login"))
+        logout(() => navigate("/"))
       }}
       variant="destructive"
       className="absolute bottom-4 inset-x-3"
@@ -45,7 +45,7 @@ const DashBoardLayout = () => {
 
   useEffect(() => {
     const parts = path.split("/")
-    setBoardOption(parts[2] ? parts[2] : "")
+    setBoardOption(parts[3] ? parts[3] : "")
   }, [path])
 
   useEffect(() => {
@@ -140,7 +140,7 @@ const DashBoardLayout = () => {
                 const Icon = icons[`${board.icon}`]
                 const navLink = (
                   <Link
-                    to={`/boards/${board._id}`}
+                    to={`/app/boards/${board._id}`}
                     key={board._id}
                     className={`flex w-full items-center duration-150 text-semibold gap-2 px-2 py-3 rounded-md hover:bg-primary/5 ${
                       path === `/boards/${board._id}`
@@ -176,19 +176,72 @@ const DashBoardLayout = () => {
                 open={openMobileMenu}
                 onOpenChange={setOpenMobileMenu}
                 className="md:hidden"
-              />
+              >
+                <>
+                  <div className="p-4 space-y-1">
+                    {staticSideBarListItems.map((item, index) => {
+                      const Icon = item.icon
+                      const navLink = (
+                        <Link
+                          to={item.path}
+                          key={index}
+                          className={`flex w-full items-center duration-150 text-semibold gap-2 px-2 py-3 rounded-md hover:bg-primary/5 ${
+                            path === item.path
+                              ? "text-primary bg-primary/10"
+                              : ""
+                          }`}
+                        >
+                          <Icon className="h-4 w-4" />
+                          <span className="text-xs">{item.label}</span>
+                        </Link>
+                      )
+
+                      return navLink
+                    })}
+                  </div>
+
+                  <div className="border-t py-2">
+                    <div className="px-4">
+                      <h2 className="font-bold">Your Boards</h2>
+                    </div>
+                    <div className="p-4 space-y-1">
+                      {boardList?.map((board) => {
+                        const Icon = icons[`${board.icon}`]
+                        const navLink = (
+                          <Link
+                            to={`/app/boards/${board._id}`}
+                            key={board._id}
+                            className={`flex w-full items-center duration-150 text-semibold gap-2 px-2 py-3 rounded-md hover:bg-primary/5 ${
+                              path === `/app/boards/${board._id}`
+                                ? "text-primary bg-primary/10"
+                                : ""
+                            }`}
+                          >
+                            <Icon className="h-4 w-4" />
+
+                            <span className="text-xs">
+                              {limitText(board.title, 30)}
+                            </span>
+                          </Link>
+                        )
+                        return navLink
+                      })}
+                    </div>
+                  </div>
+                </>
+              </ResponsiveSidebar>
               <div className="flex items-center justify-between gap-2 w-full">
                 <CustomSelect
                   options={boardOptions}
                   value={boardOption}
                   onChange={(value) => {
                     setBoardOption(value)
-                    navigate(`/boards/${value}`)
+                    navigate(`/app/boards/${value}`)
                   }}
                   placeholder="Select Board"
-                  className="w-64"
+                  className="hidden md:flex w-64"
                 />
-                <div className="h-11 w-11 rounded-full bg-slate-400 flex items-center justify-center">
+                <div className="ml-auto h-11 w-11 rounded-full bg-slate-400 flex items-center justify-center">
                   <p className="font-bold text-slate-100">
                     {user?.name?.slice(0, 1)}
                   </p>
