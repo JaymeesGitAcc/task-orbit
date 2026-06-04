@@ -35,6 +35,7 @@ import { toast } from "sonner"
 import EmptyState from "@/components/EmptyState"
 import { format } from "date-fns"
 import ListSkeleton from "@/components/skeletons/ListSkeleton"
+import DragAndDropTipBanner from "@/components/DragAndDropTipBanner"
 
 const BoardPage = () => {
   const [lists, setLists] = useState<List[]>([])
@@ -51,6 +52,9 @@ const BoardPage = () => {
   const [isDeleting, setIsDeleting] = useState(false)
   const [openListModal, setOpenListModal] = useState(false)
   const [isCreatingList, setIsCreatingList] = useState(false)
+  const [showDndTip, setShowDndTip] = useState(
+    JSON.parse(localStorage.getItem("hasSeenDndTip") || "false"),
+  )
 
   const { id: boardId } = useParams()
   const { boards } = useBoardStore()
@@ -374,6 +378,18 @@ const BoardPage = () => {
 
   return (
     <div className="flex flex-col h-full">
+      {!showDndTip && (
+        <div className="px-6">
+          <DragAndDropTipBanner
+            title="Tip: You can drag and drop!"
+            description="Drag cards between lists to move them. Drag entire lists to reorder your workflow."
+            onDismiss={() => {
+              localStorage.setItem("hasSeenDndTip", "true")
+              setShowDndTip(false)
+            }}
+          />
+        </div>
+      )}
       <div className="px-8 my-4 flex-shrink-0">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold ">{board?.title}</h1>

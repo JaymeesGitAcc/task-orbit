@@ -69,7 +69,7 @@ const CustomCard = ({
         {/* Title & Description */}
         {id ? (
           <Link
-            to={`/boards/${id}`}
+            to={`/app/boards/${id}`}
             className="text-base font-semibold text-gray-900"
           >
             {title}
