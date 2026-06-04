@@ -27,7 +27,6 @@ import { useBoardStore } from "@/store/useBoardStore"
 import { Button } from "@/components/ui/button"
 import { ListIcon, Plus } from "lucide-react"
 import TaskModal from "@/components/TaskModal"
-import { limitText } from "@/utils/limtText"
 import { formatDate } from "@/utils/formatDate"
 import DeleteDialog from "@/components/DeleteDialog"
 import ListModal from "@/components/ListModal"
@@ -391,9 +390,12 @@ const BoardPage = () => {
         </div>
       )}
       <div className="px-8 my-4 flex-shrink-0">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold ">{board?.title}</h1>
-          <Button onClick={() => setOpenListModal(true)}>
+        <div className="flex items-center flex-wrap justify-between">
+          <h1 className="text-xl md:text-2xl font-semibold">{board?.title}</h1>
+          <Button
+            onClick={() => setOpenListModal(true)}
+            className="text-xs md:text-sm"
+          >
             <ListIcon />
             Add List
           </Button>
@@ -402,7 +404,7 @@ const BoardPage = () => {
           {board?.description}
         </p>
       </div>
-      <div className="overflow-x-auto overflow-y-auto flex-1 min-h-0 px-8 pb-8">
+      <div className="overflow-x-auto overflow-y-auto flex-1 min-h-0 px-8 py-1">
         {!listsLoading ? (
           <>
             {!lists.length ? (
@@ -451,7 +453,7 @@ const BoardPage = () => {
                                     <div
                                       ref={provided.innerRef}
                                       {...provided.droppableProps}
-                                      className="w-[280px]"
+                                      className="w-[210px] md:w-[280px]"
                                     >
                                       <TasksContainer
                                         title={list.title}
@@ -486,10 +488,6 @@ const BoardPage = () => {
                                                     <TaskCard
                                                       title={card.title}
                                                       labels={card.labels}
-                                                      description={limitText(
-                                                        card.description,
-                                                        30,
-                                                      )}
                                                       dueDate={
                                                         card.dueDate
                                                           ? `${format(String(card.dueDate), "MMM d, yy")}`
@@ -528,7 +526,7 @@ const BoardPage = () => {
                                           {provided.placeholder}
                                         </div>
                                         <Button
-                                          className="w-full bg-card text-gray-600 py-5 my-2"
+                                          className="w-full shadow bg-card text-gray-600 py-5 my-2"
                                           onClick={() =>
                                             handleOpenModal({
                                               modalMode: "create",
@@ -556,11 +554,7 @@ const BoardPage = () => {
             )}
           </>
         ) : (
-          <div className="flex gap-4">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <ListSkeleton key={i} />
-            ))}
-          </div>
+          <ListSkeleton />
         )}
       </div>
 

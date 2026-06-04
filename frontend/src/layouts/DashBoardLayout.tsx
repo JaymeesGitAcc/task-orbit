@@ -29,6 +29,8 @@ const DashBoardLayout = () => {
     value: board._id,
   }))
 
+  const isBoardPage = path.split("/").length === 4
+
   const LogoutButton = (
     <Button
       onClick={() => {
@@ -70,7 +72,7 @@ const DashBoardLayout = () => {
 
   return (
     <div className="md:h-screen max-w-[1440px] mx-auto">
-      <div className="h-full border flex">
+      <div className="h-full flex">
         <aside
           className={`hidden md:block bg-sidebar relative transition-all duration-300 ${openSideBar ? "w-74" : "w-20"}`}
         >
@@ -143,7 +145,7 @@ const DashBoardLayout = () => {
                     to={`/app/boards/${board._id}`}
                     key={board._id}
                     className={`flex w-full items-center duration-150 text-semibold gap-2 px-2 py-3 rounded-md hover:bg-primary/5 ${
-                      path === `/boards/${board._id}`
+                      path === `/app/boards/${board._id}`
                         ? "text-primary bg-primary/10"
                         : ""
                     } ${!openSideBar ? "justify-center" : ""}`}
@@ -168,10 +170,11 @@ const DashBoardLayout = () => {
             )}
           </div>
         </aside>
-        <section className="w-full min-h-screen flex flex-col overflow-hidden">
-          {/* Placeholder component for nested routing */}
+        <section
+          className={`w-full min-h-screen flex flex-col ${!isBoardPage ? "overflow-auto" : "overflow-hidden"}`}
+        >
           <div className="px-8 py-5 flex-shrink-0">
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center justify-between">
               <ResponsiveSidebar
                 open={openMobileMenu}
                 onOpenChange={setOpenMobileMenu}
@@ -239,9 +242,9 @@ const DashBoardLayout = () => {
                     navigate(`/app/boards/${value}`)
                   }}
                   placeholder="Select Board"
-                  className="hidden md:flex w-64"
+                  className="w-40 md:w-64"
                 />
-                <div className="ml-auto h-11 w-11 rounded-full bg-slate-400 flex items-center justify-center">
+                <div className="ml-auto h-8 w-8 md:h-11 md:w-11 rounded-full bg-slate-400 flex items-center justify-center">
                   <p className="font-bold text-slate-100">
                     {user?.name?.slice(0, 1)}
                   </p>
@@ -250,6 +253,7 @@ const DashBoardLayout = () => {
             </div>
           </div>
           <div className="flex-1 min-h-0">
+            {/* Placeholder component for nested routing */}
             <Outlet />
           </div>
         </section>

@@ -45,7 +45,7 @@ const TaskCard = ({
       className={`rounded-lg shadow-sm border border-gray-200 bg-card ${classnames}`}
     >
       <div className="px-2 flex gap-3 items-center justify-between">
-        <h3 className="text-sm font-semibold text-gray-600">{title}</h3>
+        <h3 className="text-xs md:text-sm font-semibold text-gray-600">{title}</h3>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -75,7 +75,7 @@ const TaskCard = ({
           {visibleLables.map((l, i) => (
             <span
               key={l._id ?? i}
-              className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full ${colorMeta(l.color)?.badge ?? "bg-gray-100 text-gray-700"}`}
+              className={`inline-flex items-center gap-1 text-[9.5px] md:text-[11px] font-medium px-2 py-0.5 rounded-full ${colorMeta(l.color)?.badge ?? "bg-gray-100 text-gray-700"}`}
             >
               {l.text}
             </span>

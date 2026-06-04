@@ -26,33 +26,38 @@ const DragAndDropTipBanner = ({
 
   return (
     <div
-      className={`flex items-center gap-4 bg-indigo-50 border border-indigo-100 rounded-2xl px-4 py-3 w-full ${className}`}
+      className={`relative space-y-2 bg-indigo-50 border border-indigo-100 rounded-2xl px-4 py-3 w-full ${className}`}
     >
-      {/* Icon */}
-      <div className="shrink-0 bg-primary text-white p-2 rounded-full">
-        <Sparkles className="w-4 h-4" />
-      </div>
-
-      {/* Text */}
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-primary">✨ {title}</p>
-        <p className="text-sm text-gray-500 mt-0.5">{description}</p>
-      </div>
-
-      <Button
-        size="sm"
-        onClick={handleDismiss}
-        className="shrink-0 bg-primary text-white text-sm rounded-lg"
-      >
-        Got it
-      </Button>
-
       <button
         onClick={handleDismiss}
-        className="shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+        className="absolute right-3 top-2 shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
       >
         <X className="w-4 h-4" />
       </button>
+      <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center bg-primary text-white p-2 rounded-full w-8 h-8">
+          <Sparkles className="w-4 h-4 text-yellow-200" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs md:text-sm font-semibold text-primary">
+            {title}
+          </p>
+        </div>
+      </div>
+
+      <div>
+        <p className="text-xs md:text-sm text-gray-500">{description}</p>
+      </div>
+
+      <div className="flex justify-end gap-2">
+        <Button
+          size="sm"
+          onClick={handleDismiss}
+          className="bg-primary text-white text-sm rounded-lg"
+        >
+          Got it
+        </Button>
+      </div>
     </div>
   )
 }

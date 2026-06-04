@@ -106,12 +106,12 @@ const Settings = () => {
   }, [user])
 
   return (
-    <div className="px-8">
-      <div className="w-full max-w-lg">
-        <h2 className="text-2xl font-semibold">Settings</h2>
+    <div className="px-8 py-2">
+      <div className="md:w-xl space-y-4">
+        <h2 className="text-xl md:text-2xl font-semibold">Settings</h2>
 
         {/* Profile Section */}
-        <section className="mb-6">
+        <section className="bg-white p-5 rounded-lg shadow">
           <div className="space-y-4">
             {/* Name */}
             <div className="space-y-1.5">
@@ -147,7 +147,7 @@ const Settings = () => {
         </section>
 
         {/* Change Password Section */}
-        <section className="mb-6">
+        <section className="bg-white p-5 rounded-lg shadow">
           <h3 className="text-sm font-semibold text-gray-800 mb-4">
             Change Password
           </h3>
@@ -264,7 +264,7 @@ const Settings = () => {
               <Button
                 onClick={handleUpdatePassword}
                 disabled={isPasswordUpdating}
-                className="bg-primary text-white text-sm"
+                className="text-xs bg-primary text-white md:text-sm"
               >
                 {isPasswordUpdating ? "Updating..." : "Update Password"}
               </Button>
@@ -273,20 +273,20 @@ const Settings = () => {
         </section>
 
         {/* Danger Zone */}
-        <section>
-          <h3 className="text-sm font-semibold text-gray-800 mb-4">
+        <section className="bg-white p-3 rounded-lg shadow">
+          <h3 className="text-xs md:text-sm font-semibold text-gray-800 mb-4">
             Danger Zone
           </h3>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-red-500 font-medium">
+              <p className="text-xs md:text-sm text-red-500 font-medium">
                 Delete Account Permanently
               </p>
             </div>
             <Button
-              variant="outline"
+              variant="destructive"
               onClick={handleDeleteAccount}
-              className="text-red-500 border-red-300 hover:bg-red-50 text-sm"
+              className="text-xs md:text-sm"
             >
               Delete Account
             </Button>
