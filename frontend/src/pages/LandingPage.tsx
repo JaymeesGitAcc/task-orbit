@@ -235,13 +235,13 @@ const LandingPage = () => {
                   <div className="h-4 w-4 md:h-5 md:w-5 rounded bg-primary flex items-center justify-center">
                     <Check size={14} className="text-white" />
                   </div>
-                  <span>Create Boards for different projects</span>
+                  <span>Add Lists to represent your workflow stages</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="h-4 w-4 md:h-5 md:w-5 rounded bg-primary flex items-center justify-center">
                     <Check size={14} className="text-white" />
                   </div>
-                  <span>Create Boards for different projects</span>
+                  <span>Drag and Drop tasks to udpate progress</span>
                 </div>
               </div>
             </div>
