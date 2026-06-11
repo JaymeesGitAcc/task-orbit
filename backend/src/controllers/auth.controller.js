@@ -1,3 +1,7 @@
+import mongoose from "mongoose"
+import Board from "../models/board.model.js"
+import Card from "../models/card.model.js"
+import List from "../models/list.model.js"
 import User from "../models/user.model.js"
 import {
   generatePasswordResetEmail,
@@ -255,6 +259,60 @@ export const updatePassword = async (req, res) => {
     return sendError(res, 500, "Internal Server Error", {
       success: false,
       message: "Couldn't update password",
+    })
+  }
+}
+
+export const deleteUser = async (req, res) => {
+  const { password } = req.body
+  const userId = req.user?.id
+
+  if (!userId) {
+    return sendError(res, 401, "Unauthorized")
+  }
+  try {
+    if (!password) return sendError(res, 401, "Password is required")
+
+    const user = await User.findById(userId)
+
+    if (!user) {
+      return sendError(res, 404, "User not found")
+    }
+
+    const passwordMatchResult = await user.isPasswordCorrect(password)
+
+    if (!passwordMatchResult) {
+      return sendError(res, 401, "Incorrect Password")
+    }
+
+    const session = await mongoose.startSession()
+
+    try {
+      session.startTransaction()
+
+      await Card.deleteMany({ userId }, { session })
+      await List.deleteMany({ userId }, { session })
+      await Board.deleteMany({ userId }, { session })
+      await User.findByIdAndDelete(userId, { session })
+
+      await session.commitTransaction()
+
+      res.clearCookie("token")
+    } catch (error) {
+      await session.abortTransaction()
+      throw error
+    } finally {
+      await session.endSession()
+    }
+
+    return sendSuccess(res, 200, "Account deleted successfully", {
+      success: true,
+      message: "Account deleted successfully",
+    })
+  } catch (error) {
+    return sendError(res, 500, "Internal Server Error", {
+      success: false,
+      message: "Server Error",
     })
   }
 }

@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react"
-import { Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuthStore } from "@/store/useAuthStore"
-import { updatePassword } from "@/services/auth.api"
+import { deleteUserAccount, updatePassword } from "@/services/auth.api"
 import { toast } from "sonner"
+import DeleteAccountDialog from "@/components/DeleteAccountDialog"
+import { useNavigate } from "react-router-dom"
 
 interface ProfileForm {
   name: string
@@ -54,10 +56,12 @@ const Settings = () => {
   const [showCurrent, setShowCurrent] = useState<boolean>(false)
   const [showNew, setShowNew] = useState<boolean>(false)
   const [showConfirm, setShowConfirm] = useState<boolean>(false)
-
+  const [openDeleteUserDialog, setOpenDeleteUserDialog] = useState(false)
+  const [isDeletingUser, setIsDeletingUser] = useState(false)
   const [isPasswordUpdating, setIsPasswordUpdating] = useState(false)
 
-  const { user } = useAuthStore()
+  const { user, logout } = useAuthStore()
+  const navigate = useNavigate()
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setProfile({ ...profile, [e.target.name]: e.target.value })
@@ -74,7 +78,7 @@ const Settings = () => {
     const errs = validatePassword(passwordForm)
     setPasswordErrors(errs)
     if (Object.keys(errs).length > 0) return
-    
+
     try {
       setIsPasswordUpdating(true)
       const res = await updatePassword({
@@ -95,8 +99,22 @@ const Settings = () => {
     }
   }
 
-  const handleDeleteAccount = () => {
-    alert("Account Deleted permanently")
+  const handleDeleteAccount = async (password: string) => {
+    setIsDeletingUser(true)
+    try {
+      const { data } = await deleteUserAccount(password)
+      if (!data?.success) {
+        toast.error("Something went wrong")
+        return
+      }
+      toast.success("Account Deleted successfully")
+      logout(() => navigate("/"))
+    } catch (error) {
+      console.log(error)
+      toast.error("Something went wrong")
+    } finally {
+      setIsDeletingUser(false)
+    }
   }
 
   useEffect(() => {
@@ -285,13 +303,21 @@ const Settings = () => {
             </div>
             <Button
               variant="destructive"
-              onClick={handleDeleteAccount}
+              onClick={() => setOpenDeleteUserDialog(true)}
               className="text-xs md:text-sm"
             >
+              <Trash2 />
               Delete Account
             </Button>
           </div>
         </section>
+
+        <DeleteAccountDialog
+          open={openDeleteUserDialog}
+          onClose={() => setOpenDeleteUserDialog(false)}
+          loading={isDeletingUser}
+          onConfirm={handleDeleteAccount}
+        />
       </div>
     </div>
   )

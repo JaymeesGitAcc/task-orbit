@@ -1,6 +1,7 @@
 import express from "express"
 import {
   createUser,
+  deleteUser,
   forgotPassword,
   loginUser,
   resetPassword,
@@ -17,5 +18,6 @@ authRoutes.post("/verify-email", verifyEmail)
 authRoutes.post("/forgot-password", forgotPassword)
 authRoutes.post("/reset-password/:token", resetPassword)
 authRoutes.patch("/update-password", protect, updatePassword)
+authRoutes.delete("/account", protect, deleteUser)
 
 export default authRoutes

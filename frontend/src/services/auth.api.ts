@@ -27,3 +27,6 @@ export const updatePassword = (data: {
   currentPassword: string
   newPassword: string
 }) => API.patch("/api/auth/update-password", data)
+
+export const deleteUserAccount = (password: string) =>
+  API.delete("/api/auth/account", { data: { password } })
