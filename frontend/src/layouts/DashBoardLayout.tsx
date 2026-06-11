@@ -234,16 +234,18 @@ const DashBoardLayout = () => {
                 </>
               </ResponsiveSidebar>
               <div className="flex items-center justify-between gap-2 w-full">
-                <CustomSelect
-                  options={boardOptions}
-                  value={boardOption}
-                  onChange={(value) => {
-                    setBoardOption(value)
-                    navigate(`/app/boards/${value}`)
-                  }}
-                  placeholder="Select Board"
-                  className="w-40 md:w-64"
-                />
+                {boards?.length > 1 && (
+                  <CustomSelect
+                    options={boardOptions}
+                    value={boardOption}
+                    onChange={(value) => {
+                      setBoardOption(value)
+                      navigate(`/app/boards/${value}`)
+                    }}
+                    placeholder="Select Board"
+                    className="w-40 md:w-64"
+                  />
+                )}
                 <div className="ml-auto h-8 w-8 md:h-11 md:w-11 rounded-full bg-slate-400 flex items-center justify-center">
                   <p className="font-bold text-slate-100">
                     {user?.name?.slice(0, 1)}

@@ -25,7 +25,7 @@ import TaskCard from "@/components/TaskCard"
 import TasksContainer from "@/components/TasksContainer"
 import { useBoardStore } from "@/store/useBoardStore"
 import { Button } from "@/components/ui/button"
-import { ListIcon, Plus } from "lucide-react"
+import { ListIcon, MoreVertical, Plus } from "lucide-react"
 import TaskModal from "@/components/TaskModal"
 import { formatDate } from "@/utils/formatDate"
 import DeleteDialog from "@/components/DeleteDialog"
@@ -35,6 +35,12 @@ import EmptyState from "@/components/EmptyState"
 import { format } from "date-fns"
 import ListSkeleton from "@/components/skeletons/ListSkeleton"
 import DragAndDropTipBanner from "@/components/DragAndDropTipBanner"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const BoardPage = () => {
   const [lists, setLists] = useState<List[]>([])
@@ -45,9 +51,9 @@ const BoardPage = () => {
   const [openModal, setOpenModal] = useState(false)
   const [mode, setMode] = useState<ModalModes>("create")
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [deleteDialogType, setDeleteDialogType] = useState<"list" | "card">(
-    "list",
-  )
+  const [deleteDialogType, setDeleteDialogType] = useState<
+    "list" | "card" | "board"
+  >("list")
   const [isDeleting, setIsDeleting] = useState(false)
   const [openListModal, setOpenListModal] = useState(false)
   const [isCreatingList, setIsCreatingList] = useState(false)
@@ -56,7 +62,7 @@ const BoardPage = () => {
   )
 
   const { id: boardId } = useParams()
-  const { boards } = useBoardStore()
+  const { boards, delBoard } = useBoardStore()
   const navigate = useNavigate()
 
   const board = boards?.find((board) => board._id === boardId)
@@ -187,8 +193,6 @@ const BoardPage = () => {
     try {
       const res = await createList(title, boardId)
       const newList = res.data.data
-      console.log(newList)
-
       setLists([...lists, newList])
       setCards({
         ...cards,
@@ -295,17 +299,21 @@ const BoardPage = () => {
   const handleDeleteList = async (listId: string) => {
     setIsDeleting(true)
     try {
-      await deleteList(listId)
-
-      const updatedLists = lists.filter((list) => list._id !== listId)
-
-      const updatedCards = { ...cards }
-      delete updatedCards[listId]
-
-      setLists(updatedLists)
-      setCards(updatedCards)
+      const { data } = await deleteList(listId)
+      if (!data?.success) {
+        toast.error("Failed to delete list")
+        return
+      }
+      setLists((prev) => prev.filter((list) => list._id !== listId))
+      setCards((prev) => {
+        const updated = { ...prev }
+        delete updated[listId]
+        return updated
+      })
+      toast.success("List deleted")
     } catch (error) {
-      console.log(error)
+      console.error("Delete list error:", error)
+      toast.error("Failed to delete list")
     } finally {
       setIsDeleting(false)
     }
@@ -371,6 +379,40 @@ const BoardPage = () => {
     }
   }
 
+  const handleDeleteBoard = async (boardId?: string) => {
+    if (!boardId) {
+      toast.error("Invalid board ID")
+      return
+    }
+
+    setIsDeleting(true)
+
+    try {
+      const { data } = await delBoard(boardId)
+
+      if (!data?.success) {
+        console.error("Delete board failed:", data)
+        toast.error("Something went wrong!")
+        return
+      }
+
+      toast.success("Board deleted!")
+      navigate("/app/boards")
+    } catch (error) {
+      console.error("Failed to delete board:", error)
+      toast.error("Failed to delete board")
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const onDeleteConfirm = () => {
+    if (deleteDialogType === "card")
+      handleDeleteCard(selectedCardId, selectedListId)
+    if (deleteDialogType === "list") handleDeleteList(selectedListId)
+    if (deleteDialogType === "board") handleDeleteBoard(boardId)
+  }
+
   useEffect(() => {
     fetchLists()
   }, [boardId])
@@ -391,7 +433,33 @@ const BoardPage = () => {
       )}
       <div className="px-8 my-4 flex-shrink-0">
         <div className="flex items-center flex-wrap justify-between">
-          <h1 className="text-xl md:text-2xl font-semibold">{board?.title}</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl md:text-2xl font-semibold">
+              {board?.title}
+            </h1>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="w-7 h-7 text-gray-400 hover:text-gray-600"
+                >
+                  <MoreVertical className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  className="text-red-500"
+                  onClick={() => {
+                    setDeleteDialogType("board")
+                    setShowDeleteDialog(true)
+                  }}
+                >
+                  Delete Board
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
           <Button
             onClick={() => setOpenListModal(true)}
             className="text-xs md:text-sm"
@@ -581,11 +649,7 @@ const BoardPage = () => {
         open={showDeleteDialog}
         type={deleteDialogType}
         loading={isDeleting}
-        onConfirm={
-          deleteDialogType === "card"
-            ? () => handleDeleteCard(selectedCardId, selectedListId)
-            : () => handleDeleteList(selectedListId)
-        }
+        onConfirm={onDeleteConfirm}
         onClose={() => setShowDeleteDialog(false)}
       />
 
