@@ -3,6 +3,7 @@ import {
   createBoard,
   deleteBoard,
   getBoardById,
+  getBoardInsights,
   getBoards,
   updateBoard,
 } from "../controllers/board.controller.js"
@@ -15,5 +16,6 @@ boardRoutes.get("/", protect, getBoards)
 boardRoutes.get("/:boardId", protect, getBoardById)
 boardRoutes.delete("/:boardId", protect, deleteBoard)
 boardRoutes.patch("/:boardId", protect, updateBoard)
+boardRoutes.get("/:boardId/insights", protect, getBoardInsights)
 
 export default boardRoutes

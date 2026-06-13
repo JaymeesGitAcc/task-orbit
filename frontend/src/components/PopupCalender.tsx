@@ -24,6 +24,8 @@ const PopupCalender = ({
   disabled = false
 }: PopupCalenderProps) => {
   const [timeZone, setTimeZone] = useState<string | undefined>(undefined)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
 
   useEffect(() => {
     setTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone)
@@ -42,7 +44,7 @@ const PopupCalender = ({
           className="w-full"
           selected={date}
           onSelect={onDateChange}
-          disabled={(date) => date < new Date()}
+          disabled={(date) => date < today}
           timeZone={timeZone}
         />
         <div className="flex items-center justify-end gap-2">

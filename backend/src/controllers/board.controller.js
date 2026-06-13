@@ -100,3 +100,91 @@ export const updateBoard = async (req, res) => {
     return sendError(res, 500, `Internal Server Error:: ${error.message}`)
   }
 }
+
+export const getBoardInsights = async (req, res) => {
+  const { boardId } = req.params
+  const userId = req.user.id
+
+  if (!boardId) {
+    return sendError(res, 400, "BoardId missing", {
+      success: false,
+      message: "BoardId missing",
+    })
+  }
+
+  try {
+    const board = await Board.findOne({
+      _id: boardId,
+      userId,
+    })
+
+    if (!board) {
+      return sendError(res, 404, "Board not found", {
+        success: false,
+        message: "Board not found",
+      })
+    }
+
+    const [lists, cards] = await Promise.all([
+      List.find({ boardId }),
+      Card.find({ boardId }),
+    ])
+
+    const totalLists = lists.length
+    const totalTasks = cards.length
+
+    // Due dates are treated as calendar dates
+    // Current implementation assumes server timezone
+    const startOfToday = new Date()
+    startOfToday.setHours(0, 0, 0, 0)
+
+    const endOfToday = new Date()
+    endOfToday.setHours(23, 59, 59, 999)
+
+    const nextWeek = new Date(startOfToday)
+    nextWeek.setDate(nextWeek.getDate() + 7)
+
+    const overdueTasks = cards.filter(
+      (card) => card.dueDate && card.dueDate < startOfToday,
+    ).length
+
+    const dueToday = cards.filter(
+      (card) =>
+        card.dueDate &&
+        card.dueDate >= startOfToday &&
+        card.dueDate <= endOfToday,
+    ).length
+
+    const dueThisWeek = cards.filter(
+      (card) =>
+        card.dueDate &&
+        card.dueDate >= startOfToday &&
+        card.dueDate <= nextWeek,
+    ).length
+
+    const tasksPerList = lists.map((list) => ({
+      listId: list._id,
+      listName: list.title,
+      taskCount: cards.filter(
+        (card) => card.listId.toString() === list._id.toString(),
+      ).length,
+    }))
+
+    return sendSuccess(res, 200, "Board insights fetched", {
+      boardName: board.title,
+      totalLists,
+      totalTasks,
+      overdueTasks,
+      dueToday,
+      dueThisWeek,
+      tasksPerList,
+    })
+  } catch (error) {
+    console.error("Get Board Insights Error:", error)
+
+    return sendError(res, 500, "Internal Server Error", {
+      success: false,
+      message: "Internal Server Error",
+    })
+  }
+}

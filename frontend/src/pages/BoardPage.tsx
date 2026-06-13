@@ -25,7 +25,7 @@ import TaskCard from "@/components/TaskCard"
 import TasksContainer from "@/components/TasksContainer"
 import { useBoardStore } from "@/store/useBoardStore"
 import { Button } from "@/components/ui/button"
-import { ListIcon, MoreVertical, Plus } from "lucide-react"
+import { BarChart3, ListIcon, MoreVertical, Plus } from "lucide-react"
 import TaskModal from "@/components/TaskModal"
 import { formatDate } from "@/utils/formatDate"
 import DeleteDialog from "@/components/DeleteDialog"
@@ -41,6 +41,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import BoardInsightsModal from "@/components/BoardInsightsModal"
 
 const BoardPage = () => {
   const [lists, setLists] = useState<List[]>([])
@@ -60,6 +61,7 @@ const BoardPage = () => {
   const [showDndTip, setShowDndTip] = useState(
     JSON.parse(localStorage.getItem("hasSeenDndTip") || "false"),
   )
+  const [insightsOpen, setInsightsOpen] = useState(false)
 
   const { id: boardId } = useParams()
   const { boards, delBoard } = useBoardStore()
@@ -460,13 +462,22 @@ const BoardPage = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <Button
-            onClick={() => setOpenListModal(true)}
-            className="text-xs md:text-sm"
-          >
-            <ListIcon />
-            Add List
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => setOpenListModal(true)}
+              className="text-xs md:text-sm"
+            >
+              <ListIcon />
+              Add List
+            </Button>
+            <Button
+              onClick={() => setInsightsOpen(true)}
+              className="text-xs md:text-sm"
+            >
+              <BarChart3 className="w-4 h-4" />
+              <span>View Board Insights</span>
+            </Button>
+          </div>
         </div>
         <p className="text-sm text-muted-foreground mt-1">
           {board?.description}
@@ -663,6 +674,12 @@ const BoardPage = () => {
           })
         }}
         inProgress={isCreatingList}
+      />
+
+      <BoardInsightsModal
+        open={insightsOpen}
+        onClose={() => setInsightsOpen(false)}
+        boardId={board?._id}
       />
     </div>
   )
