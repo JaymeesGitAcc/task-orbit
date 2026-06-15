@@ -2,6 +2,7 @@ import express from "express"
 import {
   createBoard,
   deleteBoard,
+  getBoardAnalysis,
   getBoardById,
   getBoardInsights,
   getBoards,
@@ -17,5 +18,6 @@ boardRoutes.get("/:boardId", protect, getBoardById)
 boardRoutes.delete("/:boardId", protect, deleteBoard)
 boardRoutes.patch("/:boardId", protect, updateBoard)
 boardRoutes.get("/:boardId/insights", protect, getBoardInsights)
+boardRoutes.get("/:boardId/analyze", protect, getBoardAnalysis)
 
 export default boardRoutes

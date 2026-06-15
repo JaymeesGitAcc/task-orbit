@@ -19,3 +19,6 @@ export const updateBoard = (
 
 export const getBoardInsights = (boardId?: string) =>
   API.get(`/api/boards/${boardId}/insights`)
+
+export const getBoardAnalysis = (boardId?: string) =>
+  API.get(`/api/boards/${boardId}/analyze`)

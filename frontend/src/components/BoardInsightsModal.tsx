@@ -48,11 +48,17 @@ const BoardInsightsModal = ({
   const [insights, setInsights] = useState<BoardInsightsData | null>(null)
 
   const loadInsights = async () => {
-    setLoading(true)
-    setInsights(null)
-    const { data } = await getBoardInsights(boardId)
-    if (data.success) setInsights(data.data)
-    setLoading(false)
+    try {
+      setLoading(true)
+      setInsights(null)
+      const { data } = await getBoardInsights(boardId)
+      if (data.success) setInsights(data.data)
+      setLoading(false)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleOpenChange = (val: boolean) => {
@@ -66,7 +72,6 @@ const BoardInsightsModal = ({
       loadInsights()
     } else {
       setInsights(null)
-      setLoading(true)
     }
   }, [open])
 

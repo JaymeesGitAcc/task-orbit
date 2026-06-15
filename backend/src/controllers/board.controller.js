@@ -2,6 +2,8 @@ import Board from "../models/board.model.js"
 import Card from "../models/card.model.js"
 import List from "../models/list.model.js"
 import User from "../models/user.model.js"
+import { generateBoardAnalysis } from "../services/gemini.service.js"
+import { buildBoardAnalysisPrompt } from "../utils/buildBoardAnalysisPrompt.js"
 import { sendError, sendSuccess } from "../utils/response.js"
 
 export const createBoard = async (req, res) => {
@@ -181,6 +183,137 @@ export const getBoardInsights = async (req, res) => {
     })
   } catch (error) {
     console.error("Get Board Insights Error:", error)
+
+    return sendError(res, 500, "Internal Server Error", {
+      success: false,
+      message: "Internal Server Error",
+    })
+  }
+}
+
+export const getBoardAnalysis = async (req, res) => {
+  const { boardId } = req.params
+  const userId = req.user.id
+
+  if (!boardId) {
+    return sendError(res, 400, "BoardId missing", {
+      success: false,
+      message: "BoardId missing",
+    })
+  }
+
+  try {
+    const board = await Board.findOne({
+      _id: boardId,
+      userId,
+    })
+
+    if (!board) {
+      return sendError(res, 404, "Board not found", {
+        success: false,
+        message: "Board not found",
+      })
+    }
+
+    const [lists, cards] = await Promise.all([
+      List.find({ boardId }),
+      Card.find({ boardId }),
+    ])
+
+    const listMap = {}
+
+    lists.forEach((list) => {
+      listMap[list._id.toString()] = list.title
+    })
+
+    const totalLists = lists.length
+    const totalTasks = cards.length
+
+    const startOfToday = new Date()
+    startOfToday.setHours(0, 0, 0, 0)
+
+    const endOfToday = new Date()
+    endOfToday.setHours(23, 59, 59, 999)
+
+    const nextWeek = new Date(startOfToday)
+    nextWeek.setDate(nextWeek.getDate() + 7)
+
+    const overdueTasks = cards.filter(
+      (card) => card.dueDate && card.dueDate < startOfToday,
+    ).length
+
+    const dueToday = cards.filter(
+      (card) =>
+        card.dueDate &&
+        card.dueDate >= startOfToday &&
+        card.dueDate <= endOfToday,
+    ).length
+
+    const dueThisWeek = cards.filter(
+      (card) =>
+        card.dueDate &&
+        card.dueDate >= startOfToday &&
+        card.dueDate <= nextWeek,
+    ).length
+
+    const tasksPerList = lists.map((list) => ({
+      listId: list._id,
+      listName: list.title,
+      taskCount: cards.filter(
+        (card) => card.listId.toString() === list._id.toString(),
+      ).length,
+    }))
+
+    const tasksWithoutDueDate = cards.filter((card) => !card.dueDate).length
+
+    const aiPayload = {
+      boardTitle: board.title,
+      boardDescription: board.description || "",
+
+      totalTasks,
+      overdueTasks,
+      dueToday,
+      dueThisWeek,
+      tasksWithoutDueDate,
+
+      lists: lists.map((list) => ({
+        title: list.title,
+      })),
+
+      tasks: cards.map((card) => ({
+        title: card.title,
+        description: card.description?.slice(0, 300) || "",
+        listName: listMap[card.listId.toString()] || "Unknown",
+        labels: card.labels.map((label) => label.text),
+        dueDate: card.dueDate || null,
+      })),
+    }
+
+    const prompt = buildBoardAnalysisPrompt(aiPayload)
+
+    const analysisText = await generateBoardAnalysis(prompt)
+
+    let analysis
+
+    try {
+      analysis = JSON.parse(analysisText)
+    } catch (error) {
+      return sendError(res, 500, "Failed to parse AI response", {
+        success: false,
+        message: "Failed to parse AI response",
+      })
+    }
+
+    return sendSuccess(res, 200, "Board analysis generated", analysis)
+  } catch (error) {
+    console.error("Get Board Analysis Error:", error)
+
+    if (error.status === 429) {
+      return sendError(res, 429, "AI analysis limit reached", {
+        success: false,
+        message: "AI analysis limit reached. Please try again later.",
+      })
+    }
 
     return sendError(res, 500, "Internal Server Error", {
       success: false,

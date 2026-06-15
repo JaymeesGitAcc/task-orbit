@@ -25,7 +25,7 @@ import TaskCard from "@/components/TaskCard"
 import TasksContainer from "@/components/TasksContainer"
 import { useBoardStore } from "@/store/useBoardStore"
 import { Button } from "@/components/ui/button"
-import { BarChart3, ListIcon, MoreVertical, Plus } from "lucide-react"
+import { BarChart3, ListIcon, MoreVertical, Plus, Sparkles } from "lucide-react"
 import TaskModal from "@/components/TaskModal"
 import { formatDate } from "@/utils/formatDate"
 import DeleteDialog from "@/components/DeleteDialog"
@@ -42,6 +42,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import BoardInsightsModal from "@/components/BoardInsightsModal"
+import BoardAnalysisModal from "@/components/BoardAnalysisModal"
 
 const BoardPage = () => {
   const [lists, setLists] = useState<List[]>([])
@@ -62,6 +63,7 @@ const BoardPage = () => {
     JSON.parse(localStorage.getItem("hasSeenDndTip") || "false"),
   )
   const [insightsOpen, setInsightsOpen] = useState(false)
+  const [analysisOpen, setAnalysisOpen] = useState(false)
 
   const { id: boardId } = useParams()
   const { boards, delBoard } = useBoardStore()
@@ -470,9 +472,15 @@ const BoardPage = () => {
               <ListIcon />
               Add List
             </Button>
+
+            <Button onClick={() => setAnalysisOpen(true)} className="">
+              <Sparkles className="w-4 h-4" /> AI Analysis
+            </Button>
+
             <Button
               onClick={() => setInsightsOpen(true)}
               className="text-xs md:text-sm"
+              variant="outline"
             >
               <BarChart3 className="w-4 h-4" />
               <span>View Board Insights</span>
@@ -680,6 +688,12 @@ const BoardPage = () => {
         open={insightsOpen}
         onClose={() => setInsightsOpen(false)}
         boardId={board?._id}
+      />
+
+      <BoardAnalysisModal
+        open={analysisOpen}
+        onClose={() => setAnalysisOpen(false)}
+        boardId={boardId}
       />
     </div>
   )
