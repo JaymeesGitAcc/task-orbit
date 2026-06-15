@@ -2,7 +2,7 @@ import Board from "../models/board.model.js"
 import Card from "../models/card.model.js"
 import List from "../models/list.model.js"
 import User from "../models/user.model.js"
-import { generateBoardAnalysis } from "../services/gemini.service.js"
+import { generateBoardAnalysis } from "../services/ai.service.js"
 import { buildBoardAnalysisPrompt } from "../utils/buildBoardAnalysisPrompt.js"
 import { sendError, sendSuccess } from "../utils/response.js"
 
