@@ -436,45 +436,56 @@ const BoardPage = () => {
         </div>
       )}
       <div className="px-8 my-4 flex-shrink-0">
-        <div className="flex items-center flex-wrap justify-between">
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl md:text-2xl font-semibold">
-              {board?.title}
-            </h1>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="w-7 h-7 text-gray-400 hover:text-gray-600"
-                >
-                  <MoreVertical className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  className="text-red-500"
-                  onClick={() => {
-                    setDeleteDialogType("board")
-                    setShowDeleteDialog(true)
-                  }}
-                >
-                  Delete Board
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+        <div className="flex items-center flex-wrap justify-between space-y-2">
+          <div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center w-full justify-between sm:justify-start">
+                <h1 className="text-xl md:text-2xl font-semibold">
+                  {board?.title}
+                </h1>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="w-7 h-7 text-gray-400 hover:text-gray-600"
+                    >
+                      <MoreVertical className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      className="text-red-500"
+                      onClick={() => {
+                        setDeleteDialogType("board")
+                        setShowDeleteDialog(true)
+                      }}
+                    >
+                      Delete Board
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              {board?.description}
+            </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Button
               onClick={() => setOpenListModal(true)}
               className="text-xs md:text-sm"
             >
               <ListIcon />
-              Add List
+              <span>Add List</span>
             </Button>
 
-            <Button onClick={() => setAnalysisOpen(true)} className="">
-              <Sparkles className="w-4 h-4" /> AI Analysis
+            <Button
+              onClick={() => setAnalysisOpen(true)}
+              className="text-xs md:text-sm bg-secondary border border-primary"
+            >
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-primary">AI Analysis</span>
             </Button>
 
             <Button
@@ -483,13 +494,10 @@ const BoardPage = () => {
               variant="outline"
             >
               <BarChart3 className="w-4 h-4" />
-              <span>View Board Insights</span>
+              <span className="hidden md:inline">View Board Insights</span>
             </Button>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground mt-1">
-          {board?.description}
-        </p>
       </div>
       <div className="overflow-x-auto overflow-y-auto flex-1 min-h-0 px-8 py-1">
         {!listsLoading ? (

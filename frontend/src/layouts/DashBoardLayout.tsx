@@ -17,7 +17,7 @@ const DashBoardLayout = () => {
   const { boards, loading, fetchBoards } = useBoardStore()
   const [boardOption, setBoardOption] = useState("")
   const [openMobileMenu, setOpenMobileMenu] = useState(false)
-  const { user, logout } = useAuthStore()
+  const { logout } = useAuthStore()
   const navigate = useNavigate()
   const location = useLocation()
   const { pathname: path } = location
@@ -74,16 +74,8 @@ const DashBoardLayout = () => {
     <div className="md:h-screen max-w-[1440px] mx-auto">
       <div className="h-full flex">
         <aside
-          className={`hidden md:block bg-sidebar relative transition-all duration-300 ${openSideBar ? "w-74" : "w-20"}`}
+          className={`hidden md:block bg-white border-r relative transition-all duration-300 ${openSideBar ? "w-74" : "w-20"}`}
         >
-          <Button
-            size="lg"
-            variant="outline"
-            className="bg-sidebar absolute border-none -right-7 top-6 rounded hover:bg-sidebar"
-            onClick={() => setOpenSideBar((prev) => !prev)}
-          >
-            {openSideBar ? <ChevronsLeft /> : <ChevronsRight />}
-          </Button>
           <div className="px-4 py-6">
             <Logo showAppName={openSideBar} />
           </div>
@@ -173,7 +165,7 @@ const DashBoardLayout = () => {
         <section
           className={`w-full min-h-screen flex flex-col ${!isBoardPage ? "overflow-auto" : "overflow-hidden"}`}
         >
-          <div className="px-8 py-5 flex-shrink-0">
+          <div className="flex-shrink-0 bg-white border-b">
             <div className="flex items-center justify-between">
               <ResponsiveSidebar
                 open={openMobileMenu}
@@ -233,7 +225,17 @@ const DashBoardLayout = () => {
                   </div>
                 </>
               </ResponsiveSidebar>
-              <div className="flex items-center justify-between gap-2 w-full">
+              <div className="w-full min-h-[60px] flex items-center">
+                <button
+                  className="hidden md:inline p-2"
+                  onClick={() => setOpenSideBar((prev) => !prev)}
+                >
+                  {openSideBar ? (
+                    <ChevronsLeft size={18} />
+                  ) : (
+                    <ChevronsRight size={18} />
+                  )}
+                </button>
                 {boards?.length > 1 && (
                   <CustomSelect
                     options={boardOptions}
@@ -246,11 +248,14 @@ const DashBoardLayout = () => {
                     className="w-40 md:w-64"
                   />
                 )}
-                <div className="ml-auto h-8 w-8 md:h-11 md:w-11 rounded-full bg-slate-400 flex items-center justify-center">
-                  <p className="font-bold text-slate-100">
-                    {user?.name?.slice(0, 1)}
-                  </p>
-                </div>
+                <Button
+                  variant="outline"
+                  className="bg-white ml-auto mr-6"
+                  onClick={() => logout(() => navigate("/"))}
+                >
+                  <span className="hidden md:inline">Logout</span>{" "}
+                  <LogOut className="" />
+                </Button>
               </div>
             </div>
           </div>

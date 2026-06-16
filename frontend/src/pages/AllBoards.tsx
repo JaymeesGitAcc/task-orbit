@@ -81,14 +81,11 @@ const AllBoards = () => {
   }
 
   return (
-    <div className="px-8">
+    <div className="px-8 py-2">
       <div className="flex items-center gap-2 justify-between">
         <h1 className="text-lg md:text-2xl font-semibold">Boards</h1>
         <div className="flex items-center gap-2">
-          <Button
-            onClick={() => setOpenCreateModal(true)}
-            size="lg"
-          >
+          <Button onClick={() => setOpenCreateModal(true)}>
             <Plus />
             <span className="hidden md:inline">Create Board</span>
           </Button>
