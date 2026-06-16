@@ -147,7 +147,7 @@ export const deleteCard = async (req, res) => {
   }
 }
 
-export const udpateCard = async (req, res) => {
+export const updateCard = async (req, res) => {
   const { cardId } = req.params
   const userId = req.user.id
 
