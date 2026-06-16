@@ -4,7 +4,7 @@
 @import "@fontsource-variable/geist";
 
 * {
-  font-family: "Roboto", sans-serif;
+  font-family: "Manrope", sans-serif;
 }
 
 html {
@@ -70,11 +70,11 @@ html {
   --popover-foreground: oklch(0.2 0.02 260);
 
   /* 🟣 Primary (your purple) */
-  --primary: oklch(0.60 0.22 275);
+  --primary: oklch(0.6 0.22 275);
   --primary-foreground: oklch(1 0 0);
 
   --primary-hover: oklch(0.55 0.22 275);
-  --primary-active: oklch(0.50 0.22 275);
+  --primary-active: oklch(0.5 0.22 275);
 
   /* Secondary */
   --secondary: oklch(0.94 0.01 260);
