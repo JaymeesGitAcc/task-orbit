@@ -135,34 +135,32 @@ export const getBoardInsights = async (req, res) => {
     const totalLists = lists.length
     const totalTasks = cards.length
 
-    // Due dates are treated as calendar dates
-    // Current implementation assumes server timezone
-    const startOfToday = new Date()
-    startOfToday.setHours(0, 0, 0, 0)
+    const getISTDateString = (date) =>
+      new Date(date).toLocaleDateString("en-CA", {
+        timeZone: "Asia/Kolkata",
+      })
 
-    const endOfToday = new Date()
-    endOfToday.setHours(23, 59, 59, 999)
+    const today = getISTDateString(new Date())
 
-    const nextWeek = new Date(startOfToday)
+    const nextWeek = new Date()
     nextWeek.setDate(nextWeek.getDate() + 7)
+    const nextWeekString = getISTDateString(nextWeek)
 
     const overdueTasks = cards.filter(
-      (card) => card.dueDate && card.dueDate < startOfToday,
+      (card) => card.dueDate && getISTDateString(card.dueDate) < today,
     ).length
 
     const dueToday = cards.filter(
-      (card) =>
-        card.dueDate &&
-        card.dueDate >= startOfToday &&
-        card.dueDate <= endOfToday,
+      (card) => card.dueDate && getISTDateString(card.dueDate) === today,
     ).length
 
-    const dueThisWeek = cards.filter(
-      (card) =>
-        card.dueDate &&
-        card.dueDate >= startOfToday &&
-        card.dueDate <= nextWeek,
-    ).length
+    const dueThisWeek = cards.filter((card) => {
+      if (!card.dueDate) return false
+
+      const dueDate = getISTDateString(card.dueDate)
+
+      return dueDate >= today && dueDate <= nextWeekString
+    }).length
 
     const tasksPerList = lists.map((list) => ({
       listId: list._id,
