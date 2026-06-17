@@ -4,6 +4,7 @@ import { Card, CardDescription, CardTitle } from "@/components/ui/card"
 import { features } from "@/constants/landingPageItems"
 import {
   ArrowRight,
+  BarChart2,
   Check,
   LayoutDashboard,
   LogIn,
@@ -15,6 +16,7 @@ import { useNavigate } from "react-router-dom"
 import { useAuthStore } from "@/store/useAuthStore"
 import { useState } from "react"
 import ResponsiveSidebar from "@/components/ResponsiveSidebar"
+import FeatureCard from "@/components/FeatureCard"
 
 const LandingPage = () => {
   const [openMenu, setOpenMenu] = useState(false)
@@ -24,6 +26,20 @@ const LandingPage = () => {
   const NAV_LINKS = [
     { label: "Features", href: "#features" },
     { label: "How it Works", href: "#workflow" },
+  ]
+
+  const insightsFeatures = [
+    "See overdue, due today, and upcoming tasks",
+    "Track tasks due this week",
+    "View workload distribution at a glance",
+    "Make data-driven decisions",
+  ]
+
+  const analysisFeatures = [
+    "Generate project summaries",
+    "Identify risks and bottlenecks",
+    "Get smart recommendations",
+    "Plan and execute with confidence",
   ]
 
   return (
@@ -108,7 +124,10 @@ const LandingPage = () => {
                     Login
                     <LogIn />
                   </Button>
-                  <Button className="p-4 text-xs" onClick={() => navigate("/signup")}>
+                  <Button
+                    className="p-4 text-xs"
+                    onClick={() => navigate("/signup")}
+                  >
                     Sign Up
                     <ArrowRight />
                   </Button>
@@ -199,6 +218,41 @@ const LandingPage = () => {
                 </Card>
               )
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* Insights and AI analysis features */}
+      <section className="bg-gray-50 min-h-screen flex items-center justify-center px-6 py-16">
+        <div className="max-w-4xl w-full flex flex-col items-center gap-10">
+          {/* Heading */}
+          <div className="text-center px-2">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 leading-snug">
+              Smart insights.{" "}
+              <span className="block sm:inline">Smarter decisions.</span>
+            </h2>
+            <p className="text-xs sm:text-sm md:text-base text-gray-500 mt-2 max-w-md mx-auto leading-relaxed">
+              Use insights and AI analysis to understand your projects better
+              and take the right actions.
+            </p>
+          </div>
+
+          {/* Cards */}
+          <div className="flex flex-col sm:flex-row gap-4 w-full">
+            <FeatureCard
+              icon={<BarChart2 className="w-5 h-5 text-indigo-600" />}
+              iconBg="bg-indigo-50"
+              title="Board Insights"
+              description="Get a clear overview of your project health with real-time insights."
+              features={insightsFeatures}
+            />
+            <FeatureCard
+              icon={<Sparkles className="w-5 h-5 text-green-600" />}
+              iconBg="bg-green-50"
+              title="AI Analysis"
+              description="Leverage AI to analyze your board and get actionable recommendations."
+              features={analysisFeatures}
+            />
           </div>
         </div>
       </section>
