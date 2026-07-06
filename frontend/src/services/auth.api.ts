@@ -30,3 +30,5 @@ export const updatePassword = (data: {
 
 export const deleteUserAccount = (password: string) =>
   API.delete("/api/auth/account", { data: { password } })
+
+export const demoLogin = () => API.get("/api/auth/demo-login")

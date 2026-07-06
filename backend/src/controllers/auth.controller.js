@@ -11,6 +11,7 @@ import { sendError, sendSuccess } from "../utils/response.js"
 import { sendEmail } from "../utils/sendEmail.js"
 import { generateToken } from "../utils/token.js"
 import crypto from "crypto"
+import { cleanupDemoUsers } from "../services/demoCleanup.service.js"
 
 export const createUser = async (req, res) => {
   const { name, email, password } = req.body
@@ -99,6 +100,7 @@ export const loginUser = async (req, res) => {
         _id: userWithEmail._id,
         name: userWithEmail.name,
         email: userWithEmail.email,
+        isDemo: userWithEmail.isDemo,
       },
     })
   } catch (error) {
@@ -314,5 +316,67 @@ export const deleteUser = async (req, res) => {
       success: false,
       message: "Server Error",
     })
+  }
+}
+
+export const demoLogin = async (_, res) => {
+  try {
+
+    await cleanupDemoUsers() // cleanup demo users older than 24 hours
+
+    const timestamp = Date.now()
+
+    const demoUser = await User.create({
+      name: `Demo User ${timestamp}`,
+      email: `demo-${timestamp}@temp.local`,
+      password: `demo@User#${timestamp}`,
+      isVerified: true,
+      isDemo: true,
+      isTemplate: false,
+    })
+
+    const token = generateToken(demoUser._id, demoUser.email)
+    
+    return sendSuccess(res, 200, "Demo User Login Successful", {
+      token,
+      user: {
+        _id: demoUser._id,
+        name: demoUser.name,
+        email: demoUser.email,
+        isDemo: demoUser.isDemo,
+      },
+    })
+  } catch (error) {
+    return sendError(res, 500, "Internal Server Error", {
+      success: false,
+      message: "Internal Server Error",
+    })
+  }
+}
+
+export const deleteDemoUsers = async (req, res) => {
+  try {
+    const demoUsers = await User.find({ isDemo: true })
+    const userIds = demoUsers.map((user) => user._id)
+
+    await Card.deleteMany({
+      userId: { $in: userIds },
+    })
+
+    await List.deleteMany({
+      userId: { $in: userIds },
+    })
+
+    await Board.deleteMany({
+      userId: { $in: userIds },
+    })
+
+    await User.deleteMany({
+      _id: { $in: userIds },
+    })
+
+    return sendSuccess(res, 200, "Demo users deleted successfully.")
+  } catch (error) {
+    return sendError(res, 500, error.message)
   }
 }

@@ -142,6 +142,7 @@ const Settings = () => {
                 value={profile.name}
                 onChange={handleProfileChange}
                 className="text-sm"
+                disabled={user?.isDemo}
               />
             </div>
 
@@ -187,6 +188,7 @@ const Settings = () => {
                   value={passwordForm.currentPassword}
                   onChange={handlePasswordChange}
                   className={`pr-10 text-sm ${passwordErrors.currentPassword ? "border-red-400 focus-visible:ring-red-300" : ""}`}
+                  disabled={user?.isDemo}
                 />
                 <button
                   type="button"
@@ -221,6 +223,7 @@ const Settings = () => {
                   value={passwordForm.newPassword}
                   onChange={handlePasswordChange}
                   className={`pr-10 text-sm ${passwordErrors.newPassword ? "border-red-400 focus-visible:ring-red-300" : ""}`}
+                  disabled={user?.isDemo}
                 />
                 <button
                   type="button"
@@ -258,6 +261,7 @@ const Settings = () => {
                   value={passwordForm.confirmNewPassword}
                   onChange={handlePasswordChange}
                   className={`pr-10 text-sm ${passwordErrors.confirmNewPassword ? "border-red-400 focus-visible:ring-red-300" : ""}`}
+                  disabled={user?.isDemo}
                 />
                 <button
                   type="button"
@@ -281,7 +285,7 @@ const Settings = () => {
             <div className="flex justify-end">
               <Button
                 onClick={handleUpdatePassword}
-                disabled={isPasswordUpdating}
+                disabled={isPasswordUpdating || user?.isDemo}
                 className="text-xs bg-primary text-white md:text-sm"
               >
                 {isPasswordUpdating ? "Updating..." : "Update Password"}
@@ -305,6 +309,7 @@ const Settings = () => {
               variant="destructive"
               onClick={() => setOpenDeleteUserDialog(true)}
               className="text-xs md:text-sm"
+              disabled={user?.isDemo}
             >
               <Trash2 />
               Delete Account

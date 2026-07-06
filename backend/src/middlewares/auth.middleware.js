@@ -22,7 +22,7 @@ export const protect = async (req, res, next) => {
     const user = await User.findById(decodedToken.id).select("-password")
 
     if (!user) {
-      return sendError(res, 404, "User not found")
+      return sendError(res, 401, "Session expired")
     }
 
     req.user = user

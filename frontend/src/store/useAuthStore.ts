@@ -1,11 +1,12 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
-import { loginUser, signupUser } from "@/services/auth.api"
+import { demoLogin, loginUser, signupUser } from "@/services/auth.api"
 
 type User = {
   _id: string
   name: string
   email: string
+  isDemo: boolean
 }
 
 type AuthState = {
@@ -22,6 +23,7 @@ type AuthState = {
     cb?: () => void,
   ) => Promise<void>
   logout: (cd?: () => void) => void
+  demoUserLogin: (cb?: () => void) => Promise<void>
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -68,6 +70,24 @@ export const useAuthStore = create<AuthState>()(
         set({ user: null, token: null })
         useAuthStore.persist.clearStorage()
         cb?.()
+      },
+
+      demoUserLogin: async (cb) => {
+        try {
+          const res = await demoLogin()
+          const { token, user } = res.data.data
+
+          set({
+            token,
+            user,
+            loading: false,
+          })
+          cb?.()
+        } catch (err: any) {
+          set({
+            error: err.response?.data?.message || "Demo User login failed",
+          })
+        }
       },
     }),
     {

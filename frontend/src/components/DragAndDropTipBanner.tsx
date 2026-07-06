@@ -26,7 +26,7 @@ const DragAndDropTipBanner = ({
 
   return (
     <div
-      className={`relative space-y-2 bg-indigo-50 border border-indigo-100 rounded-2xl px-4 py-3 w-full ${className}`}
+      className={`relative space-y-2 bg-white border border-indigo-100 rounded-2xl px-4 py-3 w-full ${className}`}
     >
       <button
         onClick={handleDismiss}

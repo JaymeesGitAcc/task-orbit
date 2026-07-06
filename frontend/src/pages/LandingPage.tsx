@@ -7,6 +7,7 @@ import {
   BarChart2,
   Check,
   LayoutDashboard,
+  LoaderCircle,
   LogIn,
   LogOut,
   Sparkles,
@@ -17,11 +18,14 @@ import { useAuthStore } from "@/store/useAuthStore"
 import { useState } from "react"
 import ResponsiveSidebar from "@/components/ResponsiveSidebar"
 import FeatureCard from "@/components/FeatureCard"
+import { toast } from "sonner"
+// import { demoLogin } from "@/services/auth.api"
 
 const LandingPage = () => {
   const [openMenu, setOpenMenu] = useState(false)
+  const [isDemoLogging, setIsDemoLogging] = useState(false)
   const navigate = useNavigate()
-  const { user, logout } = useAuthStore()
+  const { user, logout, demoUserLogin } = useAuthStore()
 
   const NAV_LINKS = [
     { label: "Features", href: "#features" },
@@ -41,6 +45,18 @@ const LandingPage = () => {
     "Get smart recommendations",
     "Plan and execute with confidence",
   ]
+
+  const handleDemoUserLogin = async () => {
+    setIsDemoLogging(true)
+    try {
+      await demoUserLogin(() => navigate("/app/boards"))
+    } catch (error) {
+      console.log(error)
+      toast.error("Something went wrong", { position: "top-center" })
+    } finally {
+      setIsDemoLogging(false)
+    }
+  }
 
   return (
     <div className="bg-white">
@@ -162,20 +178,38 @@ const LandingPage = () => {
             <h1 className="text-primary">Stay Productive.</h1>
           </div>
 
-          <div className="mt-4 max-w-[300px] mx-auto">
-            <p className="text-sm md:text-base/7 text-gray-500">
-              TaskOrbit helps you break down work into boards, lists and tasks
-              and get things done - faster.
-            </p>
+          <div className="mt-4 mx-auto space-y-2">
+            <div className="max-w-[300px] mx-auto">
+              <p className="text-sm md:text-base/7 text-gray-500">
+                TaskOrbit helps you break down work into boards, lists and tasks
+                and get things done - faster.
+              </p>
+            </div>
 
             {!user ? (
-              <Button
-                className="w-[150px] md:w-[200px] p-4 md:p-5 mt-4 text-xs md:text-base"
-                onClick={() => navigate("/signup")}
-              >
-                Get Started
-                <ArrowRight />
-              </Button>
+              <div className="flex flex-col items-center gap-2 md:flex-row md:justify-center">
+                <Button
+                  className="w-[150px] md:w-[200px] p-4 hover:bg-primary-hover md:p-5 text-xs md:text-base"
+                  onClick={() => navigate("/signup")}
+                >
+                  Get Started
+                  <ArrowRight />
+                </Button>
+                <Button
+                  className="w-[150px] md:w-[200px] p-4 md:p-5 text-xs md:text-base bg-zinc-700 hover:bg-zinc-800"
+                  disabled={isDemoLogging}
+                  onClick={handleDemoUserLogin}
+                >
+                  {!isDemoLogging ? (
+                    "Try Demo"
+                  ) : (
+                    <div className="flex items-center gap-1 text-gray-400">
+                      <LoaderCircle className="animate-spin" />
+                      Logging in..
+                    </div>
+                  )}
+                </Button>
+              </div>
             ) : (
               <Button
                 className="w-[150px] md:w-[200px] p-4 md:p-5 mt-4 text-xs md:text-base"

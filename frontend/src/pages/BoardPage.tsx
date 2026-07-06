@@ -424,7 +424,7 @@ const BoardPage = () => {
   return (
     <div className="flex flex-col h-full">
       {!showDndTip && (
-        <div className="px-6">
+        <div className="my-3 mx-7">
           <DragAndDropTipBanner
             title="Tip: You can drag and drop!"
             description="Drag cards between lists to move them. Drag entire lists to reorder your workflow."
