@@ -5,6 +5,7 @@ import boardRoutes from "./routes/board.routes.js"
 import cardRoutes from "./routes/card.routes.js"
 import authRoutes from "./routes/auth.routes.js"
 import { sendEmail } from "./utils/sendEmail.js"
+import userRoutes from "./routes/user.routes.js"
 
 const app = express()
 
@@ -47,5 +48,6 @@ app.use("/api/boards", boardRoutes)
 app.use("/api/lists", listRoutes)
 app.use("/api/cards", cardRoutes)
 app.use("/api/auth", authRoutes)
+app.use("/api/users", userRoutes)
 
 export default app

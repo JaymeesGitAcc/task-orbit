@@ -321,7 +321,6 @@ export const deleteUser = async (req, res) => {
 
 export const demoLogin = async (_, res) => {
   try {
-
     await cleanupDemoUsers() // cleanup demo users older than 24 hours
 
     const timestamp = Date.now()
@@ -336,7 +335,7 @@ export const demoLogin = async (_, res) => {
     })
 
     const token = generateToken(demoUser._id, demoUser.email)
-    
+
     return sendSuccess(res, 200, "Demo User Login Successful", {
       token,
       user: {
